@@ -1,8 +1,25 @@
 package com.myname.mymodid;
 
+import net.minecraftforge.common.MinecraftForge;
+
+import ToolTip.TooltipHandlerEvent;
+import ToolTip.TooltipInputHandler;
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+
 public class ClientProxy extends CommonProxy {
 
-    // Override CommonProxy methods here, if you want a different behaviour on the client (e.g. registering renders).
-    // Don't forget to call the super methods as well.
+    @Override
+    public void preInit(FMLPreInitializationEvent event) {
+        super.preInit(event);
 
+        FMLCommonHandler.instance()
+            .bus()
+            .register(new TooltipInputHandler());
+        FMLCommonHandler.instance()
+            .bus()
+            .register(new TooltipHandlerEvent());
+        MinecraftForge.EVENT_BUS.register(new TooltipInputHandler());
+        MinecraftForge.EVENT_BUS.register(new TooltipHandlerEvent());
+    }
 }

@@ -10,8 +10,8 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.item.ItemStack;
-
 import net.minecraft.util.EnumChatFormatting;
+
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
@@ -38,11 +38,13 @@ public class TooltipRenderer {
     }
 
     public void renderCustomTooltip(List<String> tooltip, FontRenderer font, int x, int y, int width, int height,
-                                    ItemStack stack) {
-        if (tooltip == null) return;
-
+        ItemStack stack) {
+        if (tooltip == null) {
+            setTooltipActive(false);
+            resetPagination();
+            return;
+        }
         setTooltipActive(true);
-        checkInputInRenderer();
 
         GL11.glPushMatrix();
         GL11.glDisable(GL11.GL_DEPTH_TEST);
@@ -80,7 +82,13 @@ public class TooltipRenderer {
         drawRect(finalX, finalY, finalX + pageWidth, finalY + pageHeight, TooltipConfig.BACKGROUND_COLOR);
 
         // Рендер границ
-        drawBorder(finalX, finalY, finalX + pageWidth, finalY + pageHeight, TooltipConfig.BORDER_COLOR, TooltipConfig.BORDER_THICKNESS);
+        drawBorder(
+            finalX,
+            finalY,
+            finalX + pageWidth,
+            finalY + pageHeight,
+            TooltipConfig.BORDER_COLOR,
+            TooltipConfig.BORDER_THICKNESS);
 
         // Рендер предмета
         int itemX = finalX + TooltipConfig.PADDING;
@@ -105,9 +113,8 @@ public class TooltipRenderer {
 
         GL11.glEnable(GL11.GL_DEPTH_TEST);
         GL11.glPopMatrix();
-
-        setTooltipActive(false);
     }
+
     private static boolean lastN = false;
     private static boolean lastP = false;
 
@@ -142,7 +149,8 @@ public class TooltipRenderer {
         int headerHeight = 40; // Примерная высота заголовка
 
         for (String line : tooltip) {
-            if (line != null && !line.trim().isEmpty()) {
+            if (line != null && !line.trim()
+                .isEmpty()) {
                 int lineHeight = 10;
 
                 if (currentHeight + lineHeight > maxHeight - headerHeight && !currentPage.isEmpty()) {
@@ -167,7 +175,8 @@ public class TooltipRenderer {
         if (tooltip == null || tooltip.isEmpty()) return false;
 
         for (String line : tooltip) {
-            if (line != null && !line.trim().isEmpty()) {
+            if (line != null && !line.trim()
+                .isEmpty()) {
                 return true;
             }
         }
@@ -231,7 +240,8 @@ public class TooltipRenderer {
     private void renderTooltipContent(List<String> tooltip, FontRenderer font, int x, int y) {
         int currentY = y;
         for (String line : tooltip) {
-            if (line != null && !line.trim().isEmpty()) {
+            if (line != null && !line.trim()
+                .isEmpty()) {
                 font.drawStringWithShadow(TooltipConfig.TOOLTIP_COLOR + line, x, currentY, 0xFFFFFF);
                 currentY += 10;
             }
@@ -267,7 +277,8 @@ public class TooltipRenderer {
         // Ширина контента тултипа
         if (hasActualTooltipContent(tooltip)) {
             for (String line : tooltip) {
-                if (line != null && !line.trim().isEmpty()) {
+                if (line != null && !line.trim()
+                    .isEmpty()) {
                     maxWidth = Math.max(maxWidth, font.getStringWidth(line));
                 }
             }
@@ -297,7 +308,8 @@ public class TooltipRenderer {
         int height = 0;
         if (tooltip != null) {
             for (String line : tooltip) {
-                if (line != null && !line.trim().isEmpty()) {
+                if (line != null && !line.trim()
+                    .isEmpty()) {
                     height += 10;
                 }
             }
@@ -324,14 +336,16 @@ public class TooltipRenderer {
 
         itemRenderer.renderItemAndEffectIntoGUI(
             Minecraft.getMinecraft().fontRenderer,
-            Minecraft.getMinecraft().getTextureManager(),
+            Minecraft.getMinecraft()
+                .getTextureManager(),
             stack,
             x,
             y);
 
         itemRenderer.renderItemOverlayIntoGUI(
             Minecraft.getMinecraft().fontRenderer,
-            Minecraft.getMinecraft().getTextureManager(),
+            Minecraft.getMinecraft()
+                .getTextureManager(),
             stack,
             x,
             y);

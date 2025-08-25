@@ -20,14 +20,8 @@ public class TooltipHandlerEvent {
 
     private final TooltipRenderer renderer = new TooltipRenderer();
 
-
     @SubscribeEvent
     public void onRenderTooltip(RenderTooltipEvent event) {
-        if (event.itemStack == null) {
-            TooltipRenderer.resetPagination();
-            return;
-        }
-
         event.alternativeRenderer = tooltip -> {
             if (tooltip.isEmpty()) return;
 
@@ -90,7 +84,7 @@ public class TooltipHandlerEvent {
             tooltip.add("wdawd");
             tooltip.add("wdawd");
             tooltip.add("wdawd");
-            tooltip.add("wdawd");
+            tooltip.add("AWDAWDAWDAWD");
 
             String displayName = event.itemStack.getDisplayName();
             String oredict = getIdentifier(event.itemStack);
@@ -114,14 +108,7 @@ public class TooltipHandlerEvent {
             int mouseX = event.x;
             int mouseY = event.y;
 
-            renderer.renderCustomTooltip(
-                filteredTooltip,
-                event.font,
-                mouseX,
-                mouseY,
-                width,
-                height,
-                event.itemStack);
+            renderer.renderCustomTooltip(filteredTooltip, event.font, mouseX, mouseY, width, height, event.itemStack);
         };
     }
 
