@@ -31,6 +31,8 @@ public class TooltipRenderer {
     private static int maxTooltipPage = 1;
     private static boolean isTooltipActive = false;
 
+    private static ItemStack lastItemStack = null;
+
     public void setAdditionalInfo(String oredict, String mod, String displayName) {
         this.oredictName = oredict;
         this.modName = mod;
@@ -46,6 +48,10 @@ public class TooltipRenderer {
         }
         setTooltipActive(true);
 
+        if (lastItemStack != stack) {
+            resetPagination();
+            lastItemStack = stack;
+        }
         GL11.glPushMatrix();
         GL11.glDisable(GL11.GL_DEPTH_TEST);
 
