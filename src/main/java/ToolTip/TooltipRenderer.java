@@ -5,6 +5,7 @@ import codechicken.nei.NEIClientUtils;
 import codechicken.nei.guihook.GuiContainerManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderItem;
@@ -45,28 +46,24 @@ public class TooltipRenderer {
         // Определяем, есть ли дополнительный контент тултипа
         boolean hasTooltipContent = hasActualTooltipContent(tooltip);
 
-        // Минимальные размеры для тултипа без контента
-        if (!hasTooltipContent) {
-            width = Math.max(width, TooltipConfig.ITEM_SIZE + TooltipConfig.TEXT_MARGIN * 3 + Math.max(font.getStringWidth(displayName), font.getStringWidth(modName)));
-            height = Math.min(height, TooltipConfig.ITEM_SIZE + TooltipConfig.PADDING * 2);
-        } else {
-            Optional<String> longestWord = tooltip.stream()
-                .max(Comparator.comparingInt(String::length));
-            width = Math.max(width, TooltipConfig.ITEM_SIZE + TooltipConfig.TEXT_MARGIN * 3 + Math.max(font.getStringWidth(displayName), Math.max(font.getStringWidth(modName), font.getStringWidth(String.valueOf(longestWord)))));
-        }
+        // Ванильные отступы (только для фона)
+        int vanillaPadding = 3;
 
+        // Внутренние координаты (без ванильных отступов)
+        int innerX = x + vanillaPadding;
+        int innerY = y + vanillaPadding;
+        int innerWidth = width - vanillaPadding * 2;
+        int innerHeight = height - vanillaPadding * 2;
 
+        // Рендер фона с ванильными отступами
+        drawRect(x, y, x + width, y + height, TooltipConfig.BACKGROUND_COLOR);
 
-        // Рендер фона
-        drawRect(x - 3, y - 3, x + width + 3, y + height + 3, TooltipConfig.BACKGROUND_COLOR);
-
-        // Рендер границы
-        drawBorder(x - 3, y - 3, x + width + 3, y + height + 3,
-            TooltipConfig.BORDER_COLOR, TooltipConfig.BORDER_THICKNESS);
+        // Рендер ВАШИХ кастомных границ (белых нужной толщины)
+        drawBorder(x, y, x + width, y + height, TooltipConfig.BORDER_COLOR, TooltipConfig.BORDER_THICKNESS);
 
         // Рендер предмета
-        int itemX = x + TooltipConfig.PADDING;
-        int itemY = y + TooltipConfig.PADDING;
+        int itemX = innerX;
+        int itemY = innerY;
         drawItemStack(stack, itemX, itemY);
 
         // Рендер информации о предмете (название, oredict, мод)
@@ -77,12 +74,12 @@ public class TooltipRenderer {
         // Рендер разделительной линии только если есть дополнительный контент
         if (hasTooltipContent) {
             int headerHeight = Math.max(TooltipConfig.ITEM_SIZE, getHeaderHeight(font));
-            int separatorY = y + TooltipConfig.PADDING + headerHeight + TooltipConfig.SEPARATOR_MARGIN;
-            drawSeparator(x + TooltipConfig.PADDING, separatorY, width - TooltipConfig.PADDING * 2);
+            int separatorY = innerY + headerHeight + TooltipConfig.SEPARATOR_MARGIN;
+            drawSeparator(innerX, separatorY, innerWidth);
 
             // Рендер основного тултипа
             int tooltipStartY = separatorY + TooltipConfig.SEPARATOR_THICKNESS + TooltipConfig.SEPARATOR_MARGIN;
-            renderTooltipContent(tooltip, font, x + TooltipConfig.PADDING, tooltipStartY);
+            renderTooltipContent(tooltip, font, innerX, tooltipStartY);
         }
 
         GL11.glEnable(GL11.GL_DEPTH_TEST);
@@ -181,14 +178,15 @@ public class TooltipRenderer {
 
     public int calculateTooltipWidth(List<String> tooltip, FontRenderer font) {
         int width = TooltipConfig.ITEM_SIZE + TooltipConfig.TEXT_MARGIN * 3;
+        int vanillaPadding = 3;
 
         // Ширина текста информации о предмете
-        width = Math.max(width, font.getStringWidth(displayName) + TooltipConfig.ITEM_SIZE + TooltipConfig.TEXT_MARGIN * 2);
+        width = Math.max(width, font.getStringWidth(displayName) + TooltipConfig.ITEM_SIZE + TooltipConfig.TEXT_MARGIN * 3);
         if (!oredictName.isEmpty() && advancedSettings) {
-            width = Math.max(width, font.getStringWidth(oredictName) + TooltipConfig.ITEM_SIZE + TooltipConfig.TEXT_MARGIN * 2);
+            width = Math.max(width, font.getStringWidth(oredictName) + TooltipConfig.ITEM_SIZE + TooltipConfig.TEXT_MARGIN * 3);
         }
         if (!modName.isEmpty()) {
-            width = Math.max(width, font.getStringWidth(modName) + TooltipConfig.ITEM_SIZE + TooltipConfig.TEXT_MARGIN * 2);
+            width = Math.max(width, font.getStringWidth(modName) + TooltipConfig.ITEM_SIZE + TooltipConfig.TEXT_MARGIN * 3);
         }
 
         // Если есть дополнительный контент тултипа, учитываем его ширину
@@ -200,11 +198,13 @@ public class TooltipRenderer {
             }
         }
 
-        return Math.min(width + TooltipConfig.PADDING * 2, font.getStringWidth(displayName) + TooltipConfig.ITEM_SIZE + TooltipConfig.TEXT_MARGIN * 4);
+        // Добавляем ванильные отступы
+        return width + vanillaPadding * 2;
     }
 
     public int calculateTooltipHeight(List<String> tooltip, FontRenderer font) {
         int height = TooltipConfig.PADDING * 2;
+        int vanillaPadding = 3;
 
         // Высота заголовка (предмет + информация)
         int headerHeight = Math.max(TooltipConfig.ITEM_SIZE, getHeaderHeight(font));
@@ -218,7 +218,10 @@ public class TooltipRenderer {
         }
 
         // Ограничиваем минимальную высоту высотой заголовка
-        return Math.max(height, headerHeight + TooltipConfig.PADDING * 2);
+        int minHeight = Math.max(height, headerHeight + TooltipConfig.PADDING * 2);
+
+        // Добавляем ванильные отступы
+        return minHeight + vanillaPadding * 2;
     }
 
     private int getTooltipContentHeight(List<String> tooltip) {

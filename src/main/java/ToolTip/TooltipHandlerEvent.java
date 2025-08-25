@@ -9,6 +9,7 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.registry.GameData;
 import cpw.mods.fml.common.registry.GameRegistry;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.OreDictionary;
@@ -35,7 +36,11 @@ public class TooltipHandlerEvent {
             int width = renderer.calculateTooltipWidth(tooltip, event.font);
             int height = renderer.calculateTooltipHeight(tooltip, event.font);
 
-            int[] position = positionCalculator.calculateSafePosition(event.x, event.y, width, height);
+            // Координаты события уже в scaled coordinates
+            int mouseX = event.x;
+            int mouseY = event.y;
+
+            int[] position = positionCalculator.calculateSafePosition(mouseX, mouseY, width, height);
 
             renderer.renderCustomTooltip(tooltip, event.font, position[0], position[1], width, height, event.itemStack);
         };

@@ -12,7 +12,7 @@ public class TooltipConfig {
 
     // Borders
     public static int BORDER_COLOR = 0xFFFFFFFF;
-    public static int BORDER_THICKNESS = 2;
+    public static int BORDER_THICKNESS = 1;
 
     // Item display
     public static float ITEM_SCALE = 2.0f;
