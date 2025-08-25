@@ -2,8 +2,8 @@ package com.EvgenWarGold.TooltipImprove;
 
 import net.minecraftforge.common.MinecraftForge;
 
-import ToolTip.TooltipHandlerEvent;
 import ToolTip.InputHandlerEvent;
+import ToolTip.TooltipHandlerEvent;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 

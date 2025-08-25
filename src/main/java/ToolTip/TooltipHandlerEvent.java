@@ -26,12 +26,12 @@ public class TooltipHandlerEvent {
     private final TooltipPositionCalculator tooltipPositionCalculator = new TooltipPositionCalculator();
     private final boolean advancedSettings = Minecraft.getMinecraft().gameSettings.advancedItemTooltips;
 
-
-
     @SubscribeEvent
     public void onRenderTooltip(RenderTooltipEvent event) {
         event.alternativeRenderer = tooltip -> {
             if (tooltip.isEmpty()) return;
+
+            // tooltip.add("2,147,483,640");
 
             // Variables
             String displayName = event.itemStack.getDisplayName();
@@ -59,8 +59,10 @@ public class TooltipHandlerEvent {
                 .filter(str -> !str.contains(modName))
                 .collect(Collectors.toList());
 
-            int width = tooltipPositionCalculator.calculateTooltipWidth(filteredTooltip, event.font, displayName, oreDict, modName, advancedSettings);
-            int height = tooltipPositionCalculator.calculateTooltipHeight(filteredTooltip, event.font, displayName, oreDict, modName, advancedSettings);
+            int width = tooltipPositionCalculator
+                .calculateTooltipWidth(filteredTooltip, event.font, displayName, oreDict, modName, advancedSettings);
+            int height = tooltipPositionCalculator
+                .calculateTooltipHeight(filteredTooltip, event.font, displayName, oreDict, modName, advancedSettings);
 
             // Get textures if the ModName or Tier was found
             ResourceLocation path = null;

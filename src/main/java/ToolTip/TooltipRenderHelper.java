@@ -1,13 +1,10 @@
 package ToolTip;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.entity.RenderItem;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL12;
 
 public class TooltipRenderHelper {
 
@@ -49,7 +46,8 @@ public class TooltipRenderHelper {
         if (TooltipConfig.BACKGROUND_TEXTURE == null) return;
 
         Minecraft mc = Minecraft.getMinecraft();
-        mc.getTextureManager().bindTexture(resourceLocation);
+        mc.getTextureManager()
+            .bindTexture(resourceLocation);
 
         float texWidth = 64.0f;
         float texHeight = 64.0f;
@@ -92,7 +90,7 @@ public class TooltipRenderHelper {
     }
 
     private void renderTexturedQuad(Tessellator tessellator, double x, double y, double width, double height,
-                                    double uStart, double vStart, double uEnd, double vEnd, double texWidth, double texHeight) {
+        double uStart, double vStart, double uEnd, double vEnd, double texWidth, double texHeight) {
         double uMin = uStart / texWidth;
         double vMin = vStart / texHeight;
         double uMax = uEnd / texWidth;
@@ -110,7 +108,8 @@ public class TooltipRenderHelper {
         if (TooltipConfig.BACKGROUND_TEXTURE == null) return;
 
         Minecraft mc = Minecraft.getMinecraft();
-        mc.getTextureManager().bindTexture(resourceLocation);
+        mc.getTextureManager()
+            .bindTexture(resourceLocation);
 
         float texWidth = 64.0f;
         float texHeight = 64.0f;

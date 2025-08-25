@@ -7,7 +7,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
@@ -15,8 +14,6 @@ import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
-
-import codechicken.lib.gui.GuiDraw;
 
 public class TooltipRenderer {
 
@@ -40,7 +37,7 @@ public class TooltipRenderer {
     }
 
     public void renderCustomTooltip(List<String> tooltip, FontRenderer font, int x, int y, int width, int height,
-                                    ItemStack stack, ResourceLocation resourceLocation) {
+        ItemStack stack, ResourceLocation resourceLocation) {
         // Variables
         Minecraft mc = Minecraft.getMinecraft();
         ScaledResolution res = new ScaledResolution(mc, mc.displayWidth, mc.displayHeight);
@@ -69,12 +66,18 @@ public class TooltipRenderer {
         paginationHelper.setMaxTooltipPage(pages.size());
         List<String> currentPage = pages.isEmpty() ? new ArrayList<>() : pages.get(paginationHelper.getTooltipPage());
         if (paginationHelper.getMaxTooltipPage() > 1) {
-            currentPage.add(EnumChatFormatting.GRAY + "Page " + (paginationHelper.getTooltipPage() + 1) + "/" + paginationHelper.getMaxTooltipPage());
+            currentPage.add(
+                EnumChatFormatting.GRAY + "Page "
+                    + (paginationHelper.getTooltipPage() + 1)
+                    + "/"
+                    + paginationHelper.getMaxTooltipPage());
             currentPage.add(EnumChatFormatting.ITALIC + "Use Z to navigate");
         }
 
-        int pageWidth = positionCalculator.calculateTooltipWidth(currentPage, font, displayName, oredictName, modName, advancedSettings);
-        int pageHeight = positionCalculator.calculateTooltipHeight(currentPage, font, displayName, oredictName, modName, advancedSettings);
+        int pageWidth = positionCalculator
+            .calculateTooltipWidth(currentPage, font, displayName, oredictName, modName, advancedSettings);
+        int pageHeight = positionCalculator
+            .calculateTooltipHeight(currentPage, font, displayName, oredictName, modName, advancedSettings);
 
         int[] position = positionCalculator.calculateSafePosition(x, y, pageWidth, pageHeight);
         int finalX = position[0];
@@ -84,7 +87,8 @@ public class TooltipRenderer {
         int textX = itemX + TooltipConfig.ITEM_SIZE + TooltipConfig.TEXT_MARGIN;
         int textY = itemY;
         boolean hasTooltipContent = positionCalculator.hasActualTooltipContent(currentPage);
-        int headerHeight = positionCalculator.getHeaderHeight(font, displayName, oredictName, modName, advancedSettings);
+        int headerHeight = positionCalculator
+            .getHeaderHeight(font, displayName, oredictName, modName, advancedSettings);
         int separatorY = finalY + TooltipConfig.PADDING + headerHeight + TooltipConfig.SEPARATOR_MARGIN;
         int tooltipStartY = separatorY + TooltipConfig.SEPARATOR_THICKNESS + TooltipConfig.SEPARATOR_MARGIN;
 
@@ -125,7 +129,8 @@ public class TooltipRenderer {
                     pageWidth - TooltipConfig.PADDING * 2,
                     resourceLocation);
             } else {
-                renderHelper.drawSeparator(finalX + TooltipConfig.PADDING, separatorY, pageWidth - TooltipConfig.PADDING * 2);
+                renderHelper
+                    .drawSeparator(finalX + TooltipConfig.PADDING, separatorY, pageWidth - TooltipConfig.PADDING * 2);
             }
             renderTooltipContent(currentPage, font, finalX + TooltipConfig.PADDING, tooltipStartY);
         }
@@ -155,7 +160,8 @@ public class TooltipRenderer {
     public void renderTooltipContent(List<String> tooltip, FontRenderer font, int x, int y) {
         int currentY = y;
         for (String line : tooltip) {
-            if (line != null && !line.trim().isEmpty()) {
+            if (line != null && !line.trim()
+                .isEmpty()) {
                 font.drawStringWithShadow(TooltipConfig.TOOLTIP_COLOR + line, x, currentY, 0xFFFFFF);
                 currentY += 10;
             }

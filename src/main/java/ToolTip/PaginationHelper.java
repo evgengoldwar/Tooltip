@@ -1,7 +1,5 @@
 package ToolTip;
 
-import net.minecraft.item.ItemStack;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +19,8 @@ public class PaginationHelper {
         int lineHeight = 10;
 
         for (String line : tooltip) {
-            if (line != null && !line.trim().isEmpty()) {
+            if (line != null && !line.trim()
+                .isEmpty()) {
                 if (currentHeight + lineHeight > maxHeight - headerHeight && !currentPage.isEmpty()) {
                     pages.add(currentPage);
                     currentPage = new ArrayList<>();

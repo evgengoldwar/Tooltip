@@ -10,7 +10,7 @@ public class TooltipConfig {
     public static ResourceLocation BACKGROUND_TEXTURE = new ResourceLocation(
         "tooltipimprove",
         "textures/gui/tooltip_default.png");
-    public static boolean USE_TEXTURE_BORDER = true;
+    public static boolean USE_TEXTURE_BORDER = false;
     public static int BORDER_COLOR = 0xFFFFFFFF;
     public static int BORDER_THICKNESS = 1;
     public static float ITEM_SCALE = 2.0f;
