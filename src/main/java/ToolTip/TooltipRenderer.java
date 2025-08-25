@@ -20,6 +20,8 @@ public class TooltipRenderer {
     private String oredictName = "";
     private String modName = "";
     private String displayName = "";
+
+    private boolean advancedSettings = false;
     private static final RenderItem itemRenderer = new RenderItem();
 
     public void setAdditionalInfo(String oredict, String mod, String displayName) {
@@ -34,32 +36,60 @@ public class TooltipRenderer {
         GL11.glPushMatrix();
         GL11.glDisable(GL11.GL_DEPTH_TEST);
 
+        checkAdvancedSettings();
+
+        if (!tooltip.isEmpty()) tooltip.remove(0);
+
+        // Определяем, есть ли дополнительный контент тултипа
+        boolean hasTooltipContent = hasActualTooltipContent(tooltip);
+
+        // Рендер фона
         drawRect(x - 3, y - 3, x + width + 3, y + height + 3, TooltipConfig.BACKGROUND_COLOR);
 
+        // Рендер границы
         drawBorder(x - 3, y - 3, x + width + 3, y + height + 3,
             TooltipConfig.BORDER_COLOR, TooltipConfig.BORDER_THICKNESS);
 
+        // Рендер предмета
         int itemX = x + TooltipConfig.PADDING;
         int itemY = y + TooltipConfig.PADDING;
         drawItemStack(stack, itemX, itemY);
 
+        // Рендер информации о предмете (название, oredict, мод)
         int textX = itemX + TooltipConfig.ITEM_SIZE + TooltipConfig.TEXT_MARGIN;
         int textY = itemY;
         renderItemInfo(font, textX, textY);
 
-        int headerHeight = Math.max(TooltipConfig.ITEM_SIZE, getHeaderHeight(font));
-
-        boolean hasTooltipContent = tooltip.size() > 1;
+        // Рендер разделительной линии только если есть дополнительный контент
         if (hasTooltipContent) {
+            int headerHeight = Math.max(TooltipConfig.ITEM_SIZE, getHeaderHeight(font));
             int separatorY = y + TooltipConfig.PADDING + headerHeight + TooltipConfig.SEPARATOR_MARGIN;
             drawSeparator(x + TooltipConfig.PADDING, separatorY, width - TooltipConfig.PADDING * 2);
 
+            // Рендер основного тултипа
             int tooltipStartY = separatorY + TooltipConfig.SEPARATOR_THICKNESS + TooltipConfig.SEPARATOR_MARGIN;
             renderTooltipContent(tooltip, font, x + TooltipConfig.PADDING, tooltipStartY);
         }
 
         GL11.glEnable(GL11.GL_DEPTH_TEST);
         GL11.glPopMatrix();
+    }
+
+    private boolean hasActualTooltipContent(List<String> tooltip) {
+        if (tooltip.isEmpty()) return false;
+
+        // Проверяем, есть ли реальный контент (не пустые строки)
+        for (String line : tooltip) {
+            if (line != null && !line.trim().isEmpty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void checkAdvancedSettings() {
+        advancedSettings = Minecraft.getMinecraft().gameSettings.advancedItemTooltips;
+
     }
 
     private void drawRect(int left, int top, int right, int bottom, int color) {
@@ -107,7 +137,7 @@ public class TooltipRenderer {
         currentY += 10;
 
 
-        if (!oredictName.isEmpty()) {
+        if (!oredictName.isEmpty() && advancedSettings) {
             font.drawStringWithShadow(TooltipConfig.OREDICT_COLOR + oredictName, x, currentY, 0xFFFFFF);
             currentY += 10;
         }
@@ -119,9 +149,12 @@ public class TooltipRenderer {
     }
 
     private void renderTooltipContent(List<String> tooltip, FontRenderer font, int x, int y) {
-        for (int i = 1; i < tooltip.size(); i++) {
-            String line = tooltip.get(i);
-            font.drawStringWithShadow(TooltipConfig.TOOLTIP_COLOR + line, x, y - 5 + i * 10, 0xFFFFFF);
+        int currentY = y;
+        for (String line : tooltip) {
+            if (line != null && !line.trim().isEmpty()) {
+                font.drawStringWithShadow(TooltipConfig.TOOLTIP_COLOR + line, x, currentY, 0xFFFFFF);
+                currentY += 10;
+            }
         }
     }
 
@@ -133,19 +166,22 @@ public class TooltipRenderer {
     }
 
     public int calculateTooltipWidth(List<String> tooltip, FontRenderer font) {
-        int itemDisplayWidth = (int)(TooltipConfig.ITEM_SIZE * TooltipConfig.ITEM_SCALE);
-        int width = itemDisplayWidth + TooltipConfig.TEXT_MARGIN * 3;
+        int width = TooltipConfig.ITEM_SIZE + TooltipConfig.TEXT_MARGIN * 3;
 
-        width = Math.max(width, font.getStringWidth(displayName) + itemDisplayWidth + TooltipConfig.TEXT_MARGIN * 2);
+        // Ширина текста информации о предмете
+        width = Math.max(width, font.getStringWidth(displayName) + TooltipConfig.ITEM_SIZE + TooltipConfig.TEXT_MARGIN * 2);
         if (!oredictName.isEmpty()) {
-            width = Math.max(width, font.getStringWidth(oredictName) + itemDisplayWidth + TooltipConfig.TEXT_MARGIN * 2);
+            width = Math.max(width, font.getStringWidth(oredictName) + TooltipConfig.ITEM_SIZE + TooltipConfig.TEXT_MARGIN * 2);
         }
         if (!modName.isEmpty()) {
-            width = Math.max(width, font.getStringWidth(modName) + itemDisplayWidth + TooltipConfig.TEXT_MARGIN * 2);
+            width = Math.max(width, font.getStringWidth(modName) + TooltipConfig.ITEM_SIZE + TooltipConfig.TEXT_MARGIN * 2);
         }
 
+        // Ширина тултипа (только непустые строки)
         for (String line : tooltip) {
-            width = Math.max(width, font.getStringWidth(line) + TooltipConfig.PADDING * 2);
+            if (line != null && !line.trim().isEmpty()) {
+                width = Math.max(width, font.getStringWidth(line) + TooltipConfig.PADDING * 2);
+            }
         }
 
         return width + TooltipConfig.PADDING * 2;
@@ -154,15 +190,27 @@ public class TooltipRenderer {
     public int calculateTooltipHeight(List<String> tooltip, FontRenderer font) {
         int height = TooltipConfig.PADDING * 2;
 
+        // Высота заголовка (предмет + информация)
         int headerHeight = Math.max(TooltipConfig.ITEM_SIZE, getHeaderHeight(font));
         height += headerHeight;
 
-        boolean hasTooltipContent = tooltip.size() > 1 || (tooltip.size() == 1 && !tooltip.get(0).isEmpty());
+        // Добавляем высоту тултипа только если есть реальный контент
+        boolean hasTooltipContent = hasActualTooltipContent(tooltip);
         if (hasTooltipContent) {
             height += TooltipConfig.SEPARATOR_THICKNESS + TooltipConfig.SEPARATOR_MARGIN * 2;
-            height += tooltip.size() * 10;
+            height += getTooltipContentHeight(tooltip);
         }
 
+        return height;
+    }
+
+    private int getTooltipContentHeight(List<String> tooltip) {
+        int height = 0;
+        for (String line : tooltip) {
+            if (line != null && !line.trim().isEmpty()) {
+                height += 10; // Высота одной строки
+            }
+        }
         return height;
     }
 
