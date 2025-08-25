@@ -61,7 +61,7 @@ public class TooltipHandlerEvent {
                 .get(getModId(item));
             return mod == null ? "Minecraft" : mod.getName();
         } catch (NullPointerException e) {
-            return "";
+            return "Unknown";
         }
     }
 
@@ -69,7 +69,7 @@ public class TooltipHandlerEvent {
         if (!ItemInfo.itemOwners.containsKey(item)) {
             try {
                 GameRegistry.UniqueIdentifier ident = GameRegistry.findUniqueIdentifierFor(item);
-                ItemInfo.itemOwners.put(item, ident.modId);
+                ItemInfo.itemOwners.put(item, ident != null ? ident.modId : "Unknown");
             } catch (Exception ignored) {
                 NEIClientConfig.logger.error("Failed to find identifier for: " + item);
                 ItemInfo.itemOwners.put(item, "Unknown");

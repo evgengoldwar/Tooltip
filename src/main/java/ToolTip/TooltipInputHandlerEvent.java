@@ -19,9 +19,6 @@ public class TooltipInputHandlerEvent {
             if (isZPressed && !wasZPressed) {
                 TooltipRenderer.nextPage();
             }
-            if (Keyboard.isKeyDown(Keyboard.KEY_X)) {
-                TooltipRenderer.previousPage();
-            }
             wasZPressed = isZPressed;
         }
     }

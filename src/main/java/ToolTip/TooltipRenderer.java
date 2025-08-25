@@ -12,7 +12,6 @@ import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
 
-import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
@@ -30,14 +29,14 @@ public class TooltipRenderer {
     private static ItemStack lastItemStack = null;
 
     public void setAdditionalInfo(String oredict, String mod, String displayName) {
-        this.oredictName = oredict;
-        this.modName = mod;
-        this.displayName = displayName;
+        this.oredictName = oredict != null ? oredict : "";
+        this.modName = mod != null ? mod : "";
+        this.displayName = displayName != null ? displayName : "";
     }
 
     public void renderCustomTooltip(List<String> tooltip, FontRenderer font, int x, int y, int width, int height,
-                                    ItemStack stack) {
-        if (tooltip == null) {
+        ItemStack stack) {
+        if (tooltip == null || stack == null) {
             setTooltipActive(false);
             resetPagination();
             return;
@@ -66,7 +65,7 @@ public class TooltipRenderer {
 
         if (maxTooltipPage > 1) {
             currentPage.add(EnumChatFormatting.GRAY + "Page " + (tooltipPage + 1) + "/" + maxTooltipPage);
-            currentPage.add(EnumChatFormatting.ITALIC + "Use arrows to navigate");
+            currentPage.add(EnumChatFormatting.ITALIC + "Use Z to navigate");
         }
 
         int pageWidth = calculateTooltipWidth(currentPage, font);
@@ -76,10 +75,8 @@ public class TooltipRenderer {
         int finalX = position[0];
         int finalY = position[1];
 
-        // Рисуем фон
         drawRect(finalX, finalY, finalX + pageWidth, finalY + pageHeight, TooltipConfig.BACKGROUND_COLOR);
 
-        // Рисуем рамку (текстурированную или простую)
         if (TooltipConfig.USE_TEXTURE_BORDER) {
             drawTexturedTooltipBorder(finalX, finalY, pageWidth, pageHeight);
         } else {
@@ -105,9 +102,11 @@ public class TooltipRenderer {
             int headerHeight = getHeaderHeight(font);
             int separatorY = finalY + TooltipConfig.PADDING + headerHeight + TooltipConfig.SEPARATOR_MARGIN;
 
-            // Рисуем разделитель (текстурированный или простой)
             if (TooltipConfig.USE_TEXTURE_BORDER) {
-                drawTexturedSeparator(finalX + TooltipConfig.PADDING, separatorY, pageWidth - TooltipConfig.PADDING * 2);
+                drawTexturedSeparator(
+                    finalX + TooltipConfig.PADDING,
+                    separatorY,
+                    pageWidth - TooltipConfig.PADDING * 2);
             } else {
                 drawSeparator(finalX + TooltipConfig.PADDING, separatorY, pageWidth - TooltipConfig.PADDING * 2);
             }
@@ -120,16 +119,6 @@ public class TooltipRenderer {
         GL11.glPopMatrix();
     }
 
-    private boolean isTextureAvailable(ResourceLocation texture) {
-        if (texture == null) return false;
-        try {
-            Minecraft mc = Minecraft.getMinecraft();
-            return mc.getTextureManager().getTexture(texture) != null;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
     private List<List<String>> splitTooltipByPages(List<String> tooltip, int maxHeight) {
         List<List<String>> pages = new ArrayList<>();
         if (tooltip == null || tooltip.isEmpty()) return pages;
@@ -137,18 +126,16 @@ public class TooltipRenderer {
         List<String> currentPage = new ArrayList<>();
         int currentHeight = 0;
         int headerHeight = 40;
+        int lineHeight = 10;
 
         for (String line : tooltip) {
             if (line != null && !line.trim()
                 .isEmpty()) {
-                int lineHeight = 10;
-
                 if (currentHeight + lineHeight > maxHeight - headerHeight && !currentPage.isEmpty()) {
                     pages.add(currentPage);
                     currentPage = new ArrayList<>();
                     currentHeight = 0;
                 }
-
                 currentPage.add(line);
                 currentHeight += lineHeight;
             }
@@ -209,8 +196,10 @@ public class TooltipRenderer {
     private void renderItemInfo(FontRenderer font, int x, int y) {
         int currentY = y;
 
-        font.drawStringWithShadow(TooltipConfig.NAME_COLOR + displayName, x, currentY, 0xFFFFFF);
-        currentY += 10;
+        if (!displayName.isEmpty()) {
+            font.drawStringWithShadow(TooltipConfig.NAME_COLOR + displayName, x, currentY, 0xFFFFFF);
+            currentY += 10;
+        }
 
         if (!oredictName.isEmpty() && advancedSettings) {
             font.drawStringWithShadow(TooltipConfig.OREDICT_COLOR + oredictName, x, currentY, 0xFFFFFF);
@@ -234,7 +223,8 @@ public class TooltipRenderer {
     }
 
     private int getHeaderHeight(FontRenderer font) {
-        int height = 10;
+        int height = 0;
+        if (!displayName.isEmpty()) height += 10;
         if (!oredictName.isEmpty() && advancedSettings) height += 10;
         if (!modName.isEmpty()) height += 10;
         return Math.max(height, TooltipConfig.ITEM_SIZE);
@@ -243,8 +233,12 @@ public class TooltipRenderer {
     public int calculateTooltipWidth(List<String> tooltip, FontRenderer font) {
         int maxWidth = 0;
         int headerWidth = TooltipConfig.ITEM_SIZE + TooltipConfig.TEXT_MARGIN;
-        headerWidth += font.getStringWidth(displayName);
 
+        if (!displayName.isEmpty()) {
+            headerWidth = Math.max(
+                headerWidth,
+                TooltipConfig.ITEM_SIZE + TooltipConfig.TEXT_MARGIN + font.getStringWidth(displayName));
+        }
         if (!oredictName.isEmpty() && advancedSettings) {
             headerWidth = Math.max(
                 headerWidth,
@@ -330,7 +324,8 @@ public class TooltipRenderer {
         if (TooltipConfig.BACKGROUND_TEXTURE == null) return;
 
         Minecraft mc = Minecraft.getMinecraft();
-        mc.getTextureManager().bindTexture(TooltipConfig.BACKGROUND_TEXTURE);
+        mc.getTextureManager()
+            .bindTexture(TooltipConfig.BACKGROUND_TEXTURE);
 
         float texWidth = 64.0f;
         float texHeight = 64.0f;
@@ -341,24 +336,30 @@ public class TooltipRenderer {
 
         Tessellator tessellator = Tessellator.instance;
 
-        // Углы
         renderTexturedQuad(tessellator, x - 1, y - 1, 3, 3, 16, 16, 19, 19, texWidth, texHeight);
         renderTexturedQuad(tessellator, x + width - 2, y - 1, 3, 3, 43, 16, 46, 19, texWidth, texHeight);
         renderTexturedQuad(tessellator, x - 1, y + height - 2, 3, 3, 16, 43, 19, 46, texWidth, texHeight);
         renderTexturedQuad(tessellator, x + width - 2, y + height - 2, 3, 3, 43, 43, 46, 46, texWidth, texHeight);
 
-        // Грани
         renderTexturedQuad(tessellator, x - 1, y + 2, 1, height - 3, 16, 19, 17, 43, texWidth, texHeight);
         renderTexturedQuad(tessellator, x + width, y + 2, 1, height - 3, 45, 19, 46, 43, texWidth, texHeight);
 
-        // Верхняя грань
         renderTexturedQuad(tessellator, x + 2, y - 1, (width / 2) - 8.5, 1, 19, 16, 26, 17, texWidth, texHeight);
-        renderTexturedQuad(tessellator, x + (width / 2) + 8.5, y - 1, (width / 2) - 10.5, 1, 36, 16, 43, 17, texWidth, texHeight);
+        renderTexturedQuad(
+            tessellator,
+            x + (width / 2) + 8.5,
+            y - 1,
+            (width / 2) - 10.5,
+            1,
+            36,
+            16,
+            43,
+            17,
+            texWidth,
+            texHeight);
 
-        // Нижняя грань
         renderTexturedQuad(tessellator, x + 2, y + height, width - 3, 1, 18, 45, 43, 46, texWidth, texHeight);
 
-        // Верхние центральные элементы
         renderTexturedQuad(tessellator, x + (width / 2) - 6.5, y, 2, 1, 26, 17, 28, 18, texWidth, texHeight);
         renderTexturedQuad(tessellator, x + (width / 2) + 6.5, y, 2, 1, 34, 17, 36, 18, texWidth, texHeight);
         renderTexturedQuad(tessellator, x + (width / 2) - 6.5, y - 11, 15, 13, 1, 1, 16, 14, texWidth, texHeight);
@@ -367,7 +368,7 @@ public class TooltipRenderer {
     }
 
     private void renderTexturedQuad(Tessellator tessellator, double x, double y, double width, double height,
-                                    double uStart, double vStart, double uEnd, double vEnd, double texWidth, double texHeight) {
+        double uStart, double vStart, double uEnd, double vEnd, double texWidth, double texHeight) {
         double uMin = uStart / texWidth;
         double vMin = vStart / texHeight;
         double uMax = uEnd / texWidth;
@@ -381,24 +382,12 @@ public class TooltipRenderer {
         tessellator.draw();
     }
 
-    private void drawTexturedRect(int x, int y, int width, int height, int textureX, int textureY, int textureWidth, int textureHeight) {
-        float f = 0.00390625F; // 1/256
-        Tessellator tessellator = Tessellator.instance;
-        tessellator.startDrawingQuads();
-        tessellator.addVertexWithUV(x, y + height, 0, textureX * f, (textureY + textureHeight) * f);
-        tessellator.addVertexWithUV(x + width, y + height, 0, (textureX + textureWidth) * f, (textureY + textureHeight) * f);
-        tessellator.addVertexWithUV(x + width, y, 0, (textureX + textureWidth) * f, textureY * f);
-        tessellator.addVertexWithUV(x, y, 0, textureX * f, textureY * f);
-        tessellator.draw();
-    }
-
-
-
     private void drawTexturedSeparator(int x, int y, int width) {
         if (TooltipConfig.BACKGROUND_TEXTURE == null) return;
 
         Minecraft mc = Minecraft.getMinecraft();
-        mc.getTextureManager().bindTexture(TooltipConfig.BACKGROUND_TEXTURE);
+        mc.getTextureManager()
+            .bindTexture(TooltipConfig.BACKGROUND_TEXTURE);
 
         float texWidth = 64.0f;
         float texHeight = 64.0f;
@@ -408,14 +397,10 @@ public class TooltipRenderer {
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
         Tessellator tessellator = Tessellator.instance;
-
-        // Рисуем текстурированную линию
         renderTexturedQuad(tessellator, x, y, width, 1, 18, 7, 44, 8, texWidth, texHeight);
 
         GL11.glDisable(GL11.GL_BLEND);
     }
-
-
 
     public static void nextPage() {
         if (isTooltipActive && maxTooltipPage > 1) {
@@ -451,5 +436,6 @@ public class TooltipRenderer {
         tooltipPage = 0;
         maxTooltipPage = 1;
         isTooltipActive = false;
+        lastItemStack = null;
     }
 }

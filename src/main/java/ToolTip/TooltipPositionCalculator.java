@@ -23,13 +23,8 @@ public class TooltipPositionCalculator {
             tooltipY = Math.max(4, screenHeight - height - 4);
         }
 
-        if (tooltipX < 4) {
-            tooltipX = 4;
-        }
-
-        if (tooltipY < 4) {
-            tooltipY = 4;
-        }
+        tooltipX = Math.max(4, tooltipX);
+        tooltipY = Math.max(4, tooltipY);
 
         return new int[] { tooltipX, tooltipY };
     }
