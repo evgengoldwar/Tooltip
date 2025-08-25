@@ -35,7 +35,7 @@ public class TooltipRenderer {
     }
 
     public void renderCustomTooltip(List<String> tooltip, FontRenderer font, int x, int y, int width, int height,
-        ItemStack stack) {
+                                    ItemStack stack) {
         if (tooltip == null) {
             setTooltipActive(false);
             resetPagination();
@@ -75,14 +75,11 @@ public class TooltipRenderer {
         int finalX = position[0];
         int finalY = position[1];
 
+        // Рисуем фон
         drawRect(finalX, finalY, finalX + pageWidth, finalY + pageHeight, TooltipConfig.BACKGROUND_COLOR);
-        drawBorder(
-            finalX,
-            finalY,
-            finalX + pageWidth,
-            finalY + pageHeight,
-            TooltipConfig.BORDER_COLOR,
-            TooltipConfig.BORDER_THICKNESS);
+
+        // Рисуем текстурированную рамку
+        drawTexturedTooltipBorder(finalX, finalY, pageWidth, pageHeight);
 
         int itemX = finalX + TooltipConfig.PADDING;
         int itemY = finalY + TooltipConfig.PADDING;
@@ -301,6 +298,80 @@ public class TooltipRenderer {
 
         GL11.glPopMatrix();
     }
+
+    private void drawTexturedTooltipBorder(int x, int y, int width, int height) {
+        if (TooltipConfig.BACKGROUND_TEXTURE == null) return;
+
+        Minecraft mc = Minecraft.getMinecraft();
+        mc.getTextureManager().bindTexture(TooltipConfig.BACKGROUND_TEXTURE);
+
+        int borderSize = TooltipConfig.TEXTURE_BORDER_SIZE;
+        float texWidth = 64.0f; // Ширина текстуры
+        float texHeight = 64.0f; // Высота текстуры
+
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+        Tessellator tessellator = Tessellator.instance;
+
+        // Углы
+        renderTexturedQuad(tessellator, x - 1, y - 1, 3, 3, 16, 16, 19, 19, texWidth, texHeight);
+        renderTexturedQuad(tessellator, x + width - 2, y - 1, 3, 3, 43, 16, 46, 19, texWidth, texHeight);
+        renderTexturedQuad(tessellator, x - 1, y + height - 2, 3, 3, 16, 43, 19, 46, texWidth, texHeight);
+        renderTexturedQuad(tessellator, x + width - 2, y + height - 2, 3, 3, 43, 43, 46, 46, texWidth, texHeight);
+
+        // Грани
+        renderTexturedQuad(tessellator, x - 1, y + 2, 1, height - 3, 16, 19, 17, 43, texWidth, texHeight); // Левая
+        renderTexturedQuad(tessellator, x + width, y + 2, 1, height - 3, 45, 19, 46, 43, texWidth, texHeight); // Правая
+
+        // Верхняя грань (разделена на две части)
+        renderTexturedQuad(tessellator, x + 2, y - 1, (width / 2) - 8.5, 1, 19, 16, 26, 17, texWidth, texHeight);
+        renderTexturedQuad(tessellator, x + (width / 2) + 8.5, y - 1, (width / 2) - 10.5, 1, 36, 16, 43, 17, texWidth, texHeight);
+
+        // Нижняя грань
+        renderTexturedQuad(tessellator, x + 2, y + height, width - 3, 1, 18, 45, 43, 46, texWidth, texHeight);
+
+        // Градиентная линия (если высота достаточна)
+        if (height >= 16) {
+            renderTexturedQuad(tessellator, x + 4, y + 13, width - 8, 1, 18, 7, 44, 8, texWidth, texHeight);
+        }
+
+        // Верхние центральные элементы
+        renderTexturedQuad(tessellator, x + (width / 2) - 6.5, y, 2, 1, 26, 17, 28, 18, texWidth, texHeight);
+        renderTexturedQuad(tessellator, x + (width / 2) + 6.5, y, 2, 1, 34, 17, 36, 18, texWidth, texHeight);
+        renderTexturedQuad(tessellator, x + (width / 2) - 6.5, y - 11, 15, 13, 1, 1, 16, 14, texWidth, texHeight);
+
+        GL11.glDisable(GL11.GL_BLEND);
+    }
+
+    private void renderTexturedQuad(Tessellator tessellator, double x, double y, double width, double height,
+                                    double uStart, double vStart, double uEnd, double vEnd, double texWidth, double texHeight) {
+        double uMin = uStart / texWidth;
+        double vMin = vStart / texHeight;
+        double uMax = uEnd / texWidth;
+        double vMax = vEnd / texHeight;
+
+        tessellator.startDrawingQuads();
+        tessellator.addVertexWithUV(x, y, 0, uMin, vMin);
+        tessellator.addVertexWithUV(x, y + height, 0, uMin, vMax);
+        tessellator.addVertexWithUV(x + width, y + height, 0, uMax, vMax);
+        tessellator.addVertexWithUV(x + width, y, 0, uMax, vMin);
+        tessellator.draw();
+    }
+
+    private void drawTexturedRect(int x, int y, int width, int height, int textureX, int textureY, int textureWidth, int textureHeight) {
+        float f = 0.00390625F; // 1/256
+        Tessellator tessellator = Tessellator.instance;
+        tessellator.startDrawingQuads();
+        tessellator.addVertexWithUV(x, y + height, 0, textureX * f, (textureY + textureHeight) * f);
+        tessellator.addVertexWithUV(x + width, y + height, 0, (textureX + textureWidth) * f, (textureY + textureHeight) * f);
+        tessellator.addVertexWithUV(x + width, y, 0, (textureX + textureWidth) * f, textureY * f);
+        tessellator.addVertexWithUV(x, y, 0, textureX * f, textureY * f);
+        tessellator.draw();
+    }
+
+
 
     public static void nextPage() {
         if (isTooltipActive && maxTooltipPage > 1) {
