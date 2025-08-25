@@ -3,7 +3,7 @@ package com.myname.mymodid;
 import net.minecraftforge.common.MinecraftForge;
 
 import ToolTip.TooltipHandlerEvent;
-import ToolTip.TooltipInputHandler;
+import ToolTip.TooltipInputHandlerEvent;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 
@@ -15,11 +15,11 @@ public class ClientProxy extends CommonProxy {
 
         FMLCommonHandler.instance()
             .bus()
-            .register(new TooltipInputHandler());
+            .register(new TooltipInputHandlerEvent());
         FMLCommonHandler.instance()
             .bus()
             .register(new TooltipHandlerEvent());
-        MinecraftForge.EVENT_BUS.register(new TooltipInputHandler());
+        MinecraftForge.EVENT_BUS.register(new TooltipInputHandlerEvent());
         MinecraftForge.EVENT_BUS.register(new TooltipHandlerEvent());
     }
 }

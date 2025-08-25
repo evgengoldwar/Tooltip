@@ -92,7 +92,7 @@ public class TooltipHandlerEvent {
 
             renderer.setAdditionalInfo(oredict, modName, displayName);
 
-            List<String> filteredTooltip = new ArrayList<String>();
+            List<String> filteredTooltip = new ArrayList<>();
             boolean isFirstLine = true;
 
             for (String line : tooltip) {

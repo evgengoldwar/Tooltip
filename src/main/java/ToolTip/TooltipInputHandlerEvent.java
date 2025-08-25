@@ -5,7 +5,7 @@ import org.lwjgl.input.Keyboard;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 
-public class TooltipInputHandler {
+public class TooltipInputHandlerEvent {
 
     private boolean wasZPressed = false;
 
