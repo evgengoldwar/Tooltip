@@ -17,7 +17,7 @@ import org.lwjgl.opengl.GL12;
 
 public class TooltipRenderer {
 
-    private String oredictName = "";
+    private String oreDictName = "";
     private String modName = "";
     private String displayName = "";
     private boolean advancedSettings = false;
@@ -30,7 +30,7 @@ public class TooltipRenderer {
     private static final RenderItem itemRenderer = new RenderItem();
 
     public void setAdditionalInfo(String oredict, String mod, String displayName, Boolean advancedSettings) {
-        this.oredictName = oredict != null ? oredict : "";
+        this.oreDictName = oredict != null ? oredict : "";
         this.modName = mod != null ? mod : "";
         this.displayName = displayName != null ? displayName : "";
         this.advancedSettings = advancedSettings;
@@ -75,9 +75,9 @@ public class TooltipRenderer {
         }
 
         int pageWidth = positionCalculator
-            .calculateTooltipWidth(currentPage, font, displayName, oredictName, modName, advancedSettings);
+            .calculateTooltipWidth(currentPage, font, displayName, oreDictName, modName, advancedSettings);
         int pageHeight = positionCalculator
-            .calculateTooltipHeight(currentPage, font, displayName, oredictName, modName, advancedSettings);
+            .calculateTooltipHeight(currentPage, font, displayName, oreDictName, modName, advancedSettings);
 
         int[] position = positionCalculator.calculateSafePosition(x, y, pageWidth, pageHeight);
         int finalX = position[0];
@@ -88,7 +88,7 @@ public class TooltipRenderer {
         int textY = itemY;
         boolean hasTooltipContent = positionCalculator.hasActualTooltipContent(currentPage);
         int headerHeight = positionCalculator
-            .getHeaderHeight(font, displayName, oredictName, modName, advancedSettings);
+            .getHeaderHeight(font, displayName, oreDictName, modName, advancedSettings);
         int separatorY = finalY + TooltipConfig.PADDING + headerHeight + TooltipConfig.SEPARATOR_MARGIN;
         int tooltipStartY = separatorY + TooltipConfig.SEPARATOR_THICKNESS + TooltipConfig.SEPARATOR_MARGIN;
 
@@ -147,8 +147,8 @@ public class TooltipRenderer {
             currentY += 10;
         }
 
-        if (!oredictName.isEmpty() && advancedSettings) {
-            font.drawStringWithShadow(TooltipConfig.OREDICT_COLOR + oredictName, x, currentY, 0xFFFFFF);
+        if (!oreDictName.isEmpty() && advancedSettings) {
+            font.drawStringWithShadow(TooltipConfig.OREDICT_COLOR + oreDictName, x, currentY, 0xFFFFFF);
             currentY += 10;
         }
 
