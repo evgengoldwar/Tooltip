@@ -3,7 +3,7 @@ package com.EvgenWarGold.TooltipImprove;
 import net.minecraftforge.common.MinecraftForge;
 
 import ToolTip.TooltipHandlerEvent;
-import ToolTip.TooltipInputHandlerEvent;
+import ToolTip.InputHandlerEvent;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 
@@ -15,11 +15,11 @@ public class ClientProxy extends CommonProxy {
 
         FMLCommonHandler.instance()
             .bus()
-            .register(new TooltipInputHandlerEvent());
+            .register(new InputHandlerEvent());
         FMLCommonHandler.instance()
             .bus()
             .register(new TooltipHandlerEvent());
-        MinecraftForge.EVENT_BUS.register(new TooltipInputHandlerEvent());
+        MinecraftForge.EVENT_BUS.register(new InputHandlerEvent());
         MinecraftForge.EVENT_BUS.register(new TooltipHandlerEvent());
     }
 }

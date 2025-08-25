@@ -5,7 +5,7 @@ import org.lwjgl.input.Keyboard;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 
-public class TooltipInputHandlerEvent {
+public class InputHandlerEvent {
 
     private boolean wasZPressed = false;
 
@@ -15,9 +15,9 @@ public class TooltipInputHandlerEvent {
 
         boolean isZPressed = Keyboard.isKeyDown(Keyboard.KEY_Z);
 
-        if (TooltipRenderer.isTooltipActive()) {
+        if (PaginationHelper.isTooltipActive()) {
             if (isZPressed && !wasZPressed) {
-                TooltipRenderer.nextPage();
+                PaginationHelper.nextPage();
             }
             wasZPressed = isZPressed;
         }

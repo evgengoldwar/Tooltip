@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -22,21 +23,27 @@ import cpw.mods.fml.common.registry.GameRegistry;
 public class TooltipHandlerEvent {
 
     private final TooltipRenderer renderer = new TooltipRenderer();
+    private final TooltipPositionCalculator tooltipPositionCalculator = new TooltipPositionCalculator();
+    private final boolean advancedSettings = Minecraft.getMinecraft().gameSettings.advancedItemTooltips;
+
+
 
     @SubscribeEvent
     public void onRenderTooltip(RenderTooltipEvent event) {
         event.alternativeRenderer = tooltip -> {
             if (tooltip.isEmpty()) return;
 
+            // Variables
             String displayName = event.itemStack.getDisplayName();
-            String oredict = getIdentifier(event.itemStack);
+            String oreDict = getIdentifier(event.itemStack);
             String modName = nameFromStack(event.itemStack.getItem());
-
-            renderer.setAdditionalInfo(oredict, modName, displayName);
-
             List<String> filteredTooltip = new ArrayList<>();
             boolean isFirstLine = true;
 
+            // Setter for TooltipRenderer
+            renderer.setAdditionalInfo(oreDict, modName, displayName, advancedSettings);
+
+            // Delete duplicate Name Item
             for (String line : tooltip) {
                 if (!isFirstLine) {
                     filteredTooltip.add(line);
@@ -44,19 +51,22 @@ public class TooltipHandlerEvent {
                 isFirstLine = false;
             }
 
+            // Tier or ModName check in the list
             Optional<String> modNameFromList = Utils.findGTNameFromList(filteredTooltip);
 
+            // Delete duplicate ModName
             filteredTooltip = filteredTooltip.stream()
                 .filter(str -> !str.contains(modName))
                 .collect(Collectors.toList());
 
-            int width = renderer.calculateTooltipWidth(filteredTooltip, event.font);
-            int height = renderer.calculateTooltipHeight(filteredTooltip, event.font);
+            int width = tooltipPositionCalculator.calculateTooltipWidth(filteredTooltip, event.font, displayName, oreDict, modName, advancedSettings);
+            int height = tooltipPositionCalculator.calculateTooltipHeight(filteredTooltip, event.font, displayName, oreDict, modName, advancedSettings);
 
+            // Get textures if the ModName or Tier was found
             ResourceLocation path = null;
-
             if (modNameFromList.isPresent()) path = ModTextures.getTextureForMod(modNameFromList.get());
 
+            // Render tooltip
             renderer.renderCustomTooltip(
                 filteredTooltip,
                 event.font,
