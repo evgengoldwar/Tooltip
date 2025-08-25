@@ -13,7 +13,9 @@ import net.minecraft.util.EnumChatFormatting;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 public class TooltipRenderer {
 
@@ -42,6 +44,18 @@ public class TooltipRenderer {
 
         // Определяем, есть ли дополнительный контент тултипа
         boolean hasTooltipContent = hasActualTooltipContent(tooltip);
+
+        // Минимальные размеры для тултипа без контента
+        if (!hasTooltipContent) {
+            width = Math.max(width, TooltipConfig.ITEM_SIZE + TooltipConfig.TEXT_MARGIN * 3 + Math.max(font.getStringWidth(displayName), font.getStringWidth(modName)));
+            height = Math.min(height, TooltipConfig.ITEM_SIZE + TooltipConfig.PADDING * 2);
+        } else {
+            Optional<String> longestWord = tooltip.stream()
+                .max(Comparator.comparingInt(String::length));
+            width = Math.max(width, TooltipConfig.ITEM_SIZE + TooltipConfig.TEXT_MARGIN * 3 + Math.max(font.getStringWidth(displayName), Math.max(font.getStringWidth(modName), font.getStringWidth(String.valueOf(longestWord)))));
+        }
+
+
 
         // Рендер фона
         drawRect(x - 3, y - 3, x + width + 3, y + height + 3, TooltipConfig.BACKGROUND_COLOR);
@@ -170,21 +184,23 @@ public class TooltipRenderer {
 
         // Ширина текста информации о предмете
         width = Math.max(width, font.getStringWidth(displayName) + TooltipConfig.ITEM_SIZE + TooltipConfig.TEXT_MARGIN * 2);
-        if (!oredictName.isEmpty()) {
+        if (!oredictName.isEmpty() && advancedSettings) {
             width = Math.max(width, font.getStringWidth(oredictName) + TooltipConfig.ITEM_SIZE + TooltipConfig.TEXT_MARGIN * 2);
         }
         if (!modName.isEmpty()) {
             width = Math.max(width, font.getStringWidth(modName) + TooltipConfig.ITEM_SIZE + TooltipConfig.TEXT_MARGIN * 2);
         }
 
-        // Ширина тултипа (только непустые строки)
-        for (String line : tooltip) {
-            if (line != null && !line.trim().isEmpty()) {
-                width = Math.max(width, font.getStringWidth(line) + TooltipConfig.PADDING * 2);
+        // Если есть дополнительный контент тултипа, учитываем его ширину
+        if (hasActualTooltipContent(tooltip)) {
+            for (String line : tooltip) {
+                if (line != null && !line.trim().isEmpty()) {
+                    width = Math.max(width, font.getStringWidth(line) + TooltipConfig.PADDING * 2);
+                }
             }
         }
 
-        return width + TooltipConfig.PADDING * 2;
+        return Math.min(width + TooltipConfig.PADDING * 2, font.getStringWidth(displayName) + TooltipConfig.ITEM_SIZE + TooltipConfig.TEXT_MARGIN * 4);
     }
 
     public int calculateTooltipHeight(List<String> tooltip, FontRenderer font) {
@@ -201,7 +217,8 @@ public class TooltipRenderer {
             height += getTooltipContentHeight(tooltip);
         }
 
-        return height;
+        // Ограничиваем минимальную высоту высотой заголовка
+        return Math.max(height, headerHeight + TooltipConfig.PADDING * 2);
     }
 
     private int getTooltipContentHeight(List<String> tooltip) {

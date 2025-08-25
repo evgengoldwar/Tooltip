@@ -11,6 +11,13 @@ public class TooltipPositionCalculator {
         int screenWidth = Minecraft.getMinecraft().displayWidth;
         int screenHeight = Minecraft.getMinecraft().displayHeight;
 
+        // Обеспечиваем минимальный размер тултипа
+        int minWidth = 64; // Минимальная ширина
+        int minHeight = 32; // Минимальная высота
+
+        width = Math.max(width, minWidth);
+        height = Math.max(height, minHeight);
+
         int tooltipX = calculateXPosition(mouseX, width, screenWidth);
         int tooltipY = calculateYPosition(mouseY, height, screenHeight);
 
