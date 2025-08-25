@@ -44,12 +44,6 @@ public class PaginationHelper {
         }
     }
 
-    public void previousPage() {
-        if (isTooltipActive && maxTooltipPage > 1) {
-            tooltipPage = (tooltipPage - 1 + maxTooltipPage) % maxTooltipPage;
-        }
-    }
-
     public void setMaxTooltipPage(int maxPages) {
         maxTooltipPage = Math.max(1, maxPages);
         if (tooltipPage >= maxTooltipPage) {

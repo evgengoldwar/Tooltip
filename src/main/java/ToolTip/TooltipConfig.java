@@ -24,27 +24,4 @@ public class TooltipConfig {
     public static int SEPARATOR_MARGIN = 2;
     public static int PADDING = 3;
     public static int TEXT_MARGIN = 2;
-
-    public static void setItemScale(float scale) {
-        ITEM_SCALE = scale;
-        ITEM_SIZE = (int) (16 * scale);
-    }
-
-    public static void setBorder(int color, int thickness) {
-        BORDER_COLOR = color;
-        BORDER_THICKNESS = thickness;
-    }
-
-    public static void setSeparator(int color, int thickness, int margin) {
-        SEPARATOR_COLOR = color;
-        SEPARATOR_THICKNESS = thickness;
-        SEPARATOR_MARGIN = margin;
-    }
-
-    public static void setTextColors(String nameColor, String oredictColor, String modnameColor, String tooltipColor) {
-        NAME_COLOR = nameColor;
-        OREDICT_COLOR = oredictColor;
-        MODNAME_COLOR = modnameColor;
-        TOOLTIP_COLOR = tooltipColor;
-    }
 }

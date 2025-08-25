@@ -21,12 +21,10 @@ public class TooltipRenderer {
     private String modName = "";
     private String displayName = "";
     private boolean advancedSettings = false;
-
     private ItemStack itemStack = null;
     private final TooltipPositionCalculator positionCalculator = new TooltipPositionCalculator();
     private final TooltipRenderHelper renderHelper = new TooltipRenderHelper();
     private final PaginationHelper paginationHelper = new PaginationHelper();
-
     private static final RenderItem itemRenderer = new RenderItem();
 
     public void setAdditionalInfo(String oredict, String mod, String displayName, Boolean advancedSettings) {
