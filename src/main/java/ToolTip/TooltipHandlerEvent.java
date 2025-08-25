@@ -25,67 +25,6 @@ public class TooltipHandlerEvent {
         event.alternativeRenderer = tooltip -> {
             if (tooltip.isEmpty()) return;
 
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("wdawd");
-            tooltip.add("AWDAWDAWDAWD");
-
             String displayName = event.itemStack.getDisplayName();
             String oredict = getIdentifier(event.itemStack);
             String modName = nameFromStack(event.itemStack.getItem());
@@ -105,10 +44,7 @@ public class TooltipHandlerEvent {
             int width = renderer.calculateTooltipWidth(filteredTooltip, event.font);
             int height = renderer.calculateTooltipHeight(filteredTooltip, event.font);
 
-            int mouseX = event.x;
-            int mouseY = event.y;
-
-            renderer.renderCustomTooltip(filteredTooltip, event.font, mouseX, mouseY, width, height, event.itemStack);
+            renderer.renderCustomTooltip(filteredTooltip, event.font, event.x, event.y, width, height, event.itemStack);
         };
     }
 
@@ -130,7 +66,6 @@ public class TooltipHandlerEvent {
     }
 
     protected static String getModId(Item item) {
-
         if (!ItemInfo.itemOwners.containsKey(item)) {
             try {
                 GameRegistry.UniqueIdentifier ident = GameRegistry.findUniqueIdentifierFor(item);
@@ -140,7 +75,6 @@ public class TooltipHandlerEvent {
                 ItemInfo.itemOwners.put(item, "Unknown");
             }
         }
-
         return ItemInfo.itemOwners.get(item);
     }
 }
