@@ -1,4 +1,4 @@
-package com.myname.mymodid;
+package com.EvgenWarGold.TooltipImprove;
 
 import java.io.File;
 

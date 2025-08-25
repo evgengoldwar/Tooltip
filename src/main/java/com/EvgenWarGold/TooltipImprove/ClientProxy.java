@@ -1,4 +1,4 @@
-package com.myname.mymodid;
+package com.EvgenWarGold.TooltipImprove;
 
 import net.minecraftforge.common.MinecraftForge;
 

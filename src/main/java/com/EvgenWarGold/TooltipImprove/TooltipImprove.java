@@ -1,5 +1,6 @@
-package com.myname.mymodid;
+package com.EvgenWarGold.TooltipImprove;
 
+import com.EvgenWarGold.tooltipimproveid.Tags;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -10,13 +11,13 @@ import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 
-@Mod(modid = MyMod.MODID, version = Tags.VERSION, name = "MyMod", acceptedMinecraftVersions = "[1.7.10]")
-public class MyMod {
+@Mod(modid = TooltipImprove.MODID, version = Tags.VERSION, name = "TooltipImprove", acceptedMinecraftVersions = "[1.7.10]")
+public class TooltipImprove {
 
-    public static final String MODID = "mymodid";
+    public static final String MODID = "TooltipImprove";
     public static final Logger LOG = LogManager.getLogger(MODID);
 
-    @SidedProxy(clientSide = "com.myname.mymodid.ClientProxy", serverSide = "com.myname.mymodid.CommonProxy")
+    @SidedProxy(clientSide = "com.EvgenWarGold.TooltipImprove.ClientProxy", serverSide = "com.EvgenWarGold.TooltipImprove..CommonProxy")
     public static CommonProxy proxy;
 
     @Mod.EventHandler
