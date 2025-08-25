@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
 
+import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
@@ -78,8 +79,18 @@ public class TooltipRenderer {
         // Рисуем фон
         drawRect(finalX, finalY, finalX + pageWidth, finalY + pageHeight, TooltipConfig.BACKGROUND_COLOR);
 
-        // Рисуем текстурированную рамку
-        drawTexturedTooltipBorder(finalX, finalY, pageWidth, pageHeight);
+        // Рисуем рамку (текстурированную или простую)
+        if (TooltipConfig.USE_TEXTURE_BORDER) {
+            drawTexturedTooltipBorder(finalX, finalY, pageWidth, pageHeight);
+        } else {
+            drawBorder(
+                finalX,
+                finalY,
+                finalX + pageWidth,
+                finalY + pageHeight,
+                TooltipConfig.BORDER_COLOR,
+                TooltipConfig.BORDER_THICKNESS);
+        }
 
         int itemX = finalX + TooltipConfig.PADDING;
         int itemY = finalY + TooltipConfig.PADDING;
@@ -93,7 +104,13 @@ public class TooltipRenderer {
         if (hasTooltipContent) {
             int headerHeight = getHeaderHeight(font);
             int separatorY = finalY + TooltipConfig.PADDING + headerHeight + TooltipConfig.SEPARATOR_MARGIN;
-            drawSeparator(finalX + TooltipConfig.PADDING, separatorY, pageWidth - TooltipConfig.PADDING * 2);
+
+            // Рисуем разделитель (текстурированный или простой)
+            if (TooltipConfig.USE_TEXTURE_BORDER) {
+                drawTexturedSeparator(finalX + TooltipConfig.PADDING, separatorY, pageWidth - TooltipConfig.PADDING * 2);
+            } else {
+                drawSeparator(finalX + TooltipConfig.PADDING, separatorY, pageWidth - TooltipConfig.PADDING * 2);
+            }
 
             int tooltipStartY = separatorY + TooltipConfig.SEPARATOR_THICKNESS + TooltipConfig.SEPARATOR_MARGIN;
             renderTooltipContent(currentPage, font, finalX + TooltipConfig.PADDING, tooltipStartY);
@@ -101,6 +118,16 @@ public class TooltipRenderer {
 
         GL11.glEnable(GL11.GL_DEPTH_TEST);
         GL11.glPopMatrix();
+    }
+
+    private boolean isTextureAvailable(ResourceLocation texture) {
+        if (texture == null) return false;
+        try {
+            Minecraft mc = Minecraft.getMinecraft();
+            return mc.getTextureManager().getTexture(texture) != null;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private List<List<String>> splitTooltipByPages(List<String> tooltip, int maxHeight) {
@@ -305,9 +332,8 @@ public class TooltipRenderer {
         Minecraft mc = Minecraft.getMinecraft();
         mc.getTextureManager().bindTexture(TooltipConfig.BACKGROUND_TEXTURE);
 
-        int borderSize = TooltipConfig.TEXTURE_BORDER_SIZE;
-        float texWidth = 64.0f; // Ширина текстуры
-        float texHeight = 64.0f; // Высота текстуры
+        float texWidth = 64.0f;
+        float texHeight = 64.0f;
 
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
         GL11.glEnable(GL11.GL_BLEND);
@@ -322,20 +348,15 @@ public class TooltipRenderer {
         renderTexturedQuad(tessellator, x + width - 2, y + height - 2, 3, 3, 43, 43, 46, 46, texWidth, texHeight);
 
         // Грани
-        renderTexturedQuad(tessellator, x - 1, y + 2, 1, height - 3, 16, 19, 17, 43, texWidth, texHeight); // Левая
-        renderTexturedQuad(tessellator, x + width, y + 2, 1, height - 3, 45, 19, 46, 43, texWidth, texHeight); // Правая
+        renderTexturedQuad(tessellator, x - 1, y + 2, 1, height - 3, 16, 19, 17, 43, texWidth, texHeight);
+        renderTexturedQuad(tessellator, x + width, y + 2, 1, height - 3, 45, 19, 46, 43, texWidth, texHeight);
 
-        // Верхняя грань (разделена на две части)
+        // Верхняя грань
         renderTexturedQuad(tessellator, x + 2, y - 1, (width / 2) - 8.5, 1, 19, 16, 26, 17, texWidth, texHeight);
         renderTexturedQuad(tessellator, x + (width / 2) + 8.5, y - 1, (width / 2) - 10.5, 1, 36, 16, 43, 17, texWidth, texHeight);
 
         // Нижняя грань
         renderTexturedQuad(tessellator, x + 2, y + height, width - 3, 1, 18, 45, 43, 46, texWidth, texHeight);
-
-        // Градиентная линия (если высота достаточна)
-        if (height >= 16) {
-            renderTexturedQuad(tessellator, x + 4, y + 13, width - 8, 1, 18, 7, 44, 8, texWidth, texHeight);
-        }
 
         // Верхние центральные элементы
         renderTexturedQuad(tessellator, x + (width / 2) - 6.5, y, 2, 1, 26, 17, 28, 18, texWidth, texHeight);
@@ -369,6 +390,29 @@ public class TooltipRenderer {
         tessellator.addVertexWithUV(x + width, y, 0, (textureX + textureWidth) * f, textureY * f);
         tessellator.addVertexWithUV(x, y, 0, textureX * f, textureY * f);
         tessellator.draw();
+    }
+
+
+
+    private void drawTexturedSeparator(int x, int y, int width) {
+        if (TooltipConfig.BACKGROUND_TEXTURE == null) return;
+
+        Minecraft mc = Minecraft.getMinecraft();
+        mc.getTextureManager().bindTexture(TooltipConfig.BACKGROUND_TEXTURE);
+
+        float texWidth = 64.0f;
+        float texHeight = 64.0f;
+
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+        Tessellator tessellator = Tessellator.instance;
+
+        // Рисуем текстурированную линию
+        renderTexturedQuad(tessellator, x, y, width, 1, 18, 7, 44, 8, texWidth, texHeight);
+
+        GL11.glDisable(GL11.GL_BLEND);
     }
 
 
