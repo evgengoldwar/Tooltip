@@ -14,6 +14,9 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.OreDictionary;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class TooltipHandlerEvent {
 
@@ -27,14 +30,24 @@ public class TooltipHandlerEvent {
         event.alternativeRenderer = tooltip -> {
             if (tooltip.isEmpty()) return;
 
+
             String displayName = event.itemStack.getDisplayName();
             String oredict = getIdentifier(event.itemStack);
             String modName = nameFromStack(event.itemStack.getItem());
 
             renderer.setAdditionalInfo(oredict, modName, displayName);
 
-            int width = renderer.calculateTooltipWidth(tooltip, event.font);
-            int height = renderer.calculateTooltipHeight(tooltip, event.font);
+            List<String> filteredTooltip = new ArrayList<String>();
+            boolean isFirstLine = true;
+
+            for (String line : tooltip) {
+                if (!isFirstLine) {
+                    filteredTooltip.add(line);
+                }
+                isFirstLine = false;
+            }
+            int width = renderer.calculateTooltipWidth(filteredTooltip, event.font);
+            int height = renderer.calculateTooltipHeight(filteredTooltip, event.font);
 
             // Координаты события уже в scaled coordinates
             int mouseX = event.x;
@@ -42,7 +55,7 @@ public class TooltipHandlerEvent {
 
             int[] position = positionCalculator.calculateSafePosition(mouseX, mouseY, width, height);
 
-            renderer.renderCustomTooltip(tooltip, event.font, position[0], position[1], width, height, event.itemStack);
+            renderer.renderCustomTooltip(filteredTooltip, event.font, position[0], position[1], width, height, event.itemStack);
         };
     }
 
