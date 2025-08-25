@@ -1,8 +1,8 @@
 package ToolTip;
 
-import codechicken.lib.gui.GuiDraw;
-import codechicken.nei.NEIClientUtils;
-import codechicken.nei.guihook.GuiContainerManager;
+import java.util.ArrayList;
+import java.util.List;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.ScaledResolution;
@@ -10,13 +10,11 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.item.ItemStack;
+
 import net.minecraft.util.EnumChatFormatting;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
-
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
 
 public class TooltipRenderer {
 
@@ -26,6 +24,12 @@ public class TooltipRenderer {
 
     private boolean advancedSettings = false;
     private static final RenderItem itemRenderer = new RenderItem();
+    private final TooltipPositionCalculator positionCalculator = new TooltipPositionCalculator();
+
+    // Пагинация
+    private static int tooltipPage = 0;
+    private static int maxTooltipPage = 1;
+    private static boolean isTooltipActive = false;
 
     public void setAdditionalInfo(String oredict, String mod, String displayName) {
         this.oredictName = oredict;
@@ -33,23 +37,54 @@ public class TooltipRenderer {
         this.displayName = displayName;
     }
 
-    public void renderCustomTooltip(List<String> tooltip, FontRenderer font, int x, int y, int width, int height, ItemStack stack) {
+    public void renderCustomTooltip(List<String> tooltip, FontRenderer font, int x, int y, int width, int height,
+                                    ItemStack stack) {
         if (tooltip == null) return;
+
+        setTooltipActive(true);
+        checkInputInRenderer();
 
         GL11.glPushMatrix();
         GL11.glDisable(GL11.GL_DEPTH_TEST);
 
         checkAdvancedSettings();
 
+        // Рассчитываем максимальную доступную высоту
+        Minecraft mc = Minecraft.getMinecraft();
+        ScaledResolution res = new ScaledResolution(mc, mc.displayWidth, mc.displayHeight);
+        int screenHeight = res.getScaledHeight();
+        int maxAvailableHeight = screenHeight - y - 10;
+
+        // Разделяем тултип на страницы
+        List<List<String>> pages = splitTooltipByPages(tooltip, maxAvailableHeight);
+        setMaxTooltipPage(pages.size());
+
+        List<String> currentPage = pages.isEmpty() ? new ArrayList<String>() : pages.get(tooltipPage);
+
+        // Добавляем информацию о странице если нужно
+        if (maxTooltipPage > 1) {
+            currentPage.add(EnumChatFormatting.GRAY + "Page " + (tooltipPage + 1) + "/" + maxTooltipPage);
+            currentPage.add(EnumChatFormatting.ITALIC + "Use arrows to navigate");
+        }
+
+        // Пересчитываем размеры для текущей страницы
+        int pageWidth = calculateTooltipWidth(currentPage, font);
+        int pageHeight = calculateTooltipHeight(currentPage, font);
+
+        // Обновляем позицию
+        int[] position = positionCalculator.calculateSafePosition(x, y, pageWidth, pageHeight);
+        int finalX = position[0];
+        int finalY = position[1];
+
         // Рендер фона
-        drawRect(x, y, x + width, y + height, TooltipConfig.BACKGROUND_COLOR);
+        drawRect(finalX, finalY, finalX + pageWidth, finalY + pageHeight, TooltipConfig.BACKGROUND_COLOR);
 
         // Рендер границ
-        drawBorder(x, y, x + width, y + height, TooltipConfig.BORDER_COLOR, TooltipConfig.BORDER_THICKNESS);
+        drawBorder(finalX, finalY, finalX + pageWidth, finalY + pageHeight, TooltipConfig.BORDER_COLOR, TooltipConfig.BORDER_THICKNESS);
 
         // Рендер предмета
-        int itemX = x + TooltipConfig.PADDING;
-        int itemY = y + TooltipConfig.PADDING;
+        int itemX = finalX + TooltipConfig.PADDING;
+        int itemY = finalY + TooltipConfig.PADDING;
         drawItemStack(stack, itemX, itemY);
 
         // Рендер информации о предмете
@@ -57,22 +92,75 @@ public class TooltipRenderer {
         int textY = itemY;
         renderItemInfo(font, textX, textY);
 
-        // Определяем, есть ли дополнительный контент тултипа
-        boolean hasTooltipContent = hasActualTooltipContent(tooltip);
-
-        // Рендер разделительной линии и контента только если есть дополнительный контент
+        // Рендер контента тултипа
+        boolean hasTooltipContent = hasActualTooltipContent(currentPage);
         if (hasTooltipContent) {
             int headerHeight = getHeaderHeight(font);
-            int separatorY = y + TooltipConfig.PADDING + headerHeight + TooltipConfig.SEPARATOR_MARGIN;
-            drawSeparator(x + TooltipConfig.PADDING, separatorY, width - TooltipConfig.PADDING * 2);
+            int separatorY = finalY + TooltipConfig.PADDING + headerHeight + TooltipConfig.SEPARATOR_MARGIN;
+            drawSeparator(finalX + TooltipConfig.PADDING, separatorY, pageWidth - TooltipConfig.PADDING * 2);
 
-            // Рендер основного тултипа
             int tooltipStartY = separatorY + TooltipConfig.SEPARATOR_THICKNESS + TooltipConfig.SEPARATOR_MARGIN;
-            renderTooltipContent(tooltip, font, x + TooltipConfig.PADDING, tooltipStartY);
+            renderTooltipContent(currentPage, font, finalX + TooltipConfig.PADDING, tooltipStartY);
         }
 
         GL11.glEnable(GL11.GL_DEPTH_TEST);
         GL11.glPopMatrix();
+
+        setTooltipActive(false);
+    }
+    private static boolean lastN = false;
+    private static boolean lastP = false;
+
+    private void checkInputInRenderer() {
+        try {
+            boolean nNow = Keyboard.isKeyDown(Keyboard.KEY_N);
+            boolean pNow = Keyboard.isKeyDown(Keyboard.KEY_P);
+
+            if (nNow && !lastN) {
+                System.out.println("[RENDER] N pressed in renderer!");
+                nextPage();
+            }
+            lastN = nNow;
+
+            if (pNow && !lastP) {
+                System.out.println("[RENDER] P pressed in renderer!");
+                previousPage();
+            }
+            lastP = pNow;
+
+        } catch (Exception e) {
+            System.out.println("[RENDER] Input check error: " + e.getMessage());
+        }
+    }
+
+    private List<List<String>> splitTooltipByPages(List<String> tooltip, int maxHeight) {
+        List<List<String>> pages = new ArrayList<>();
+        if (tooltip == null || tooltip.isEmpty()) return pages;
+
+        List<String> currentPage = new ArrayList<>();
+        int currentHeight = 0;
+        int headerHeight = 40; // Примерная высота заголовка
+
+        for (String line : tooltip) {
+            if (line != null && !line.trim().isEmpty()) {
+                int lineHeight = 10;
+
+                if (currentHeight + lineHeight > maxHeight - headerHeight && !currentPage.isEmpty()) {
+                    pages.add(currentPage);
+                    currentPage = new ArrayList<>();
+                    currentHeight = 0;
+                }
+
+                currentPage.add(line);
+                currentHeight += lineHeight;
+            }
+        }
+
+        if (!currentPage.isEmpty()) {
+            pages.add(currentPage);
+        }
+
+        return pages;
     }
 
     private boolean hasActualTooltipContent(List<String> tooltip) {
@@ -91,10 +179,10 @@ public class TooltipRenderer {
     }
 
     private void drawRect(int left, int top, int right, int bottom, int color) {
-        float alpha = (float)(color >> 24 & 255) / 255.0F;
-        float red = (float)(color >> 16 & 255) / 255.0F;
-        float green = (float)(color >> 8 & 255) / 255.0F;
-        float blue = (float)(color & 255) / 255.0F;
+        float alpha = (float) (color >> 24 & 255) / 255.0F;
+        float red = (float) (color >> 16 & 255) / 255.0F;
+        float green = (float) (color >> 8 & 255) / 255.0F;
+        float blue = (float) (color & 255) / 255.0F;
 
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         GL11.glColor4f(red, green, blue, alpha);
@@ -165,10 +253,13 @@ public class TooltipRenderer {
         headerWidth += font.getStringWidth(displayName);
 
         if (!oredictName.isEmpty() && advancedSettings) {
-            headerWidth = Math.max(headerWidth, TooltipConfig.ITEM_SIZE + TooltipConfig.TEXT_MARGIN + font.getStringWidth(oredictName));
+            headerWidth = Math.max(
+                headerWidth,
+                TooltipConfig.ITEM_SIZE + TooltipConfig.TEXT_MARGIN + font.getStringWidth(oredictName));
         }
         if (!modName.isEmpty()) {
-            headerWidth = Math.max(headerWidth, TooltipConfig.ITEM_SIZE + TooltipConfig.TEXT_MARGIN + font.getStringWidth(modName));
+            headerWidth = Math
+                .max(headerWidth, TooltipConfig.ITEM_SIZE + TooltipConfig.TEXT_MARGIN + font.getStringWidth(modName));
         }
 
         maxWidth = headerWidth;
@@ -236,16 +327,14 @@ public class TooltipRenderer {
             Minecraft.getMinecraft().getTextureManager(),
             stack,
             x,
-            y
-        );
+            y);
 
         itemRenderer.renderItemOverlayIntoGUI(
             Minecraft.getMinecraft().fontRenderer,
             Minecraft.getMinecraft().getTextureManager(),
             stack,
             x,
-            y
-        );
+            y);
 
         RenderHelper.disableStandardItemLighting();
 
@@ -254,5 +343,45 @@ public class TooltipRenderer {
         }
 
         GL11.glPopMatrix();
+    }
+
+    // Методы пагинации
+    public static void nextPage() {
+        if (isTooltipActive && maxTooltipPage > 1) {
+            tooltipPage = (tooltipPage + 1) % maxTooltipPage;
+            System.out.println("Next page: " + (tooltipPage + 1) + "/" + maxTooltipPage);
+            Minecraft.getMinecraft().currentScreen = Minecraft.getMinecraft().currentScreen;
+        }
+    }
+
+    public static void previousPage() {
+        if (isTooltipActive && maxTooltipPage > 1) {
+            tooltipPage = (tooltipPage - 1 + maxTooltipPage) % maxTooltipPage;
+            System.out.println("Previous page: " + (tooltipPage + 1) + "/" + maxTooltipPage);
+        }
+    }
+
+    public static void setMaxTooltipPage(int maxPages) {
+        maxTooltipPage = Math.max(1, maxPages);
+        if (tooltipPage >= maxTooltipPage) {
+            tooltipPage = 0;
+        }
+    }
+
+    public static void setTooltipActive(boolean active) {
+        isTooltipActive = active;
+        if (!active) {
+            resetPagination();
+        }
+    }
+
+    public static boolean isTooltipActive() {
+        return isTooltipActive;
+    }
+
+    public static void resetPagination() {
+        tooltipPage = 0;
+        maxTooltipPage = 1;
+        isTooltipActive = false;
     }
 }

@@ -4,7 +4,7 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.ResourceLocation;
 
 public class TooltipConfig {
-//    0xFF2D2D2D; // Темно-серый
+    // 0xFF2D2D2D; // Темно-серый
 
     // Background
     public static int BACKGROUND_COLOR = 0xFF2D2D2D;
@@ -35,7 +35,7 @@ public class TooltipConfig {
 
     public static void setItemScale(float scale) {
         ITEM_SCALE = scale;
-        ITEM_SIZE = (int)(16 * scale);
+        ITEM_SIZE = (int) (16 * scale);
     }
 
     public static void setBorder(int color, int thickness) {

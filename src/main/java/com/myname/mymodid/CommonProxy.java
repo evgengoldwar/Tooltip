@@ -1,11 +1,13 @@
 package com.myname.mymodid;
 
+import cpw.mods.fml.common.FMLCommonHandler;
+import net.minecraftforge.common.MinecraftForge;
+
 import ToolTip.TooltipHandlerEvent;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
-import net.minecraftforge.common.MinecraftForge;
 
 public class CommonProxy {
 
@@ -16,13 +18,14 @@ public class CommonProxy {
 
         MinecraftForge.EVENT_BUS.register(new TooltipHandlerEvent());
 
+
         MyMod.LOG.info(Config.greeting);
         MyMod.LOG.info("I am MyMod at version " + Tags.VERSION);
     }
 
     // load "Do your mod setup. Build whatever data structures you care about. Register recipes." (Remove if not needed)
     public void init(FMLInitializationEvent event) {
-//        GuiContainerManager.addTooltipHandler(new CustomTooltipHandler());
+        // GuiContainerManager.addTooltipHandler(new CustomTooltipHandler());
         System.out.println("Beautiful tooltips registered!");
     }
 
