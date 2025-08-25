@@ -11,9 +11,12 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
+
+import codechicken.lib.gui.GuiDraw;
 
 public class TooltipRenderer {
 
@@ -35,13 +38,15 @@ public class TooltipRenderer {
     }
 
     public void renderCustomTooltip(List<String> tooltip, FontRenderer font, int x, int y, int width, int height,
-        ItemStack stack) {
+        ItemStack stack, ResourceLocation resourceLocation) {
         if (tooltip == null || stack == null) {
             setTooltipActive(false);
             resetPagination();
             return;
         }
         setTooltipActive(true);
+
+        if (resourceLocation == null) resourceLocation = TooltipConfig.BACKGROUND_TEXTURE;
 
         if (lastItemStack != stack) {
             resetPagination();
@@ -50,6 +55,7 @@ public class TooltipRenderer {
 
         GL11.glPushMatrix();
         GL11.glDisable(GL11.GL_DEPTH_TEST);
+        GL11.glTranslatef(0, 0, 500);
 
         advancedSettings = Minecraft.getMinecraft().gameSettings.advancedItemTooltips;
 
@@ -78,7 +84,7 @@ public class TooltipRenderer {
         drawRect(finalX, finalY, finalX + pageWidth, finalY + pageHeight, TooltipConfig.BACKGROUND_COLOR);
 
         if (TooltipConfig.USE_TEXTURE_BORDER) {
-            drawTexturedTooltipBorder(finalX, finalY, pageWidth, pageHeight);
+            drawTexturedTooltipBorder(finalX, finalY, pageWidth, pageHeight, resourceLocation);
         } else {
             drawBorder(
                 finalX,
@@ -91,7 +97,11 @@ public class TooltipRenderer {
 
         int itemX = finalX + TooltipConfig.PADDING;
         int itemY = finalY + TooltipConfig.PADDING;
+        GL11.glPushMatrix();
+        GL11.glEnable(GL11.GL_DEPTH_TEST);
+        GL11.glTranslatef(0, 0, 100);
         drawItemStack(stack, itemX, itemY);
+        GL11.glPopMatrix();
 
         int textX = itemX + TooltipConfig.ITEM_SIZE + TooltipConfig.TEXT_MARGIN;
         int textY = itemY;
@@ -106,7 +116,8 @@ public class TooltipRenderer {
                 drawTexturedSeparator(
                     finalX + TooltipConfig.PADDING,
                     separatorY,
-                    pageWidth - TooltipConfig.PADDING * 2);
+                    pageWidth - TooltipConfig.PADDING * 2,
+                    resourceLocation);
             } else {
                 drawSeparator(finalX + TooltipConfig.PADDING, separatorY, pageWidth - TooltipConfig.PADDING * 2);
             }
@@ -305,7 +316,6 @@ public class TooltipRenderer {
 
         RenderHelper.enableGUIStandardItemLighting();
         GL11.glEnable(GL12.GL_RESCALE_NORMAL);
-        GL11.glTranslatef(0, 0, 300);
 
         Minecraft mc = Minecraft.getMinecraft();
         itemRenderer.renderItemAndEffectIntoGUI(mc.fontRenderer, mc.getTextureManager(), stack, x, y);
@@ -317,15 +327,16 @@ public class TooltipRenderer {
             GL11.glEnable(GL11.GL_DEPTH_TEST);
         }
 
+
         GL11.glPopMatrix();
     }
 
-    private void drawTexturedTooltipBorder(int x, int y, int width, int height) {
+    private void drawTexturedTooltipBorder(int x, int y, int width, int height, ResourceLocation resourceLocation) {
         if (TooltipConfig.BACKGROUND_TEXTURE == null) return;
 
         Minecraft mc = Minecraft.getMinecraft();
         mc.getTextureManager()
-            .bindTexture(TooltipConfig.BACKGROUND_TEXTURE);
+            .bindTexture(resourceLocation);
 
         float texWidth = 64.0f;
         float texHeight = 64.0f;
@@ -382,12 +393,12 @@ public class TooltipRenderer {
         tessellator.draw();
     }
 
-    private void drawTexturedSeparator(int x, int y, int width) {
+    private void drawTexturedSeparator(int x, int y, int width, ResourceLocation resourceLocation) {
         if (TooltipConfig.BACKGROUND_TEXTURE == null) return;
 
         Minecraft mc = Minecraft.getMinecraft();
         mc.getTextureManager()
-            .bindTexture(TooltipConfig.BACKGROUND_TEXTURE);
+            .bindTexture(resourceLocation);
 
         float texWidth = 64.0f;
         float texHeight = 64.0f;

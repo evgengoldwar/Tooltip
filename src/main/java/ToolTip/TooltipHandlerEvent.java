@@ -2,9 +2,12 @@ package ToolTip;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 
 import com.gtnewhorizon.gtnhlib.client.event.RenderTooltipEvent;
 
@@ -25,6 +28,8 @@ public class TooltipHandlerEvent {
         event.alternativeRenderer = tooltip -> {
             if (tooltip.isEmpty()) return;
 
+            tooltip.add("32_127");
+
             String displayName = event.itemStack.getDisplayName();
             String oredict = getIdentifier(event.itemStack);
             String modName = nameFromStack(event.itemStack.getItem());
@@ -41,10 +46,28 @@ public class TooltipHandlerEvent {
                 isFirstLine = false;
             }
 
+            Optional<String> modNameFromList = Utils.findGTNameFromList(filteredTooltip);
+
+            filteredTooltip = filteredTooltip.stream()
+                .filter(str -> !str.contains(modName))
+                .collect(Collectors.toList());
+
             int width = renderer.calculateTooltipWidth(filteredTooltip, event.font);
             int height = renderer.calculateTooltipHeight(filteredTooltip, event.font);
 
-            renderer.renderCustomTooltip(filteredTooltip, event.font, event.x, event.y, width, height, event.itemStack);
+            ResourceLocation path = null;
+
+            if (modNameFromList.isPresent()) path = ModTextures.getTextureForMod(modNameFromList.get());
+
+            renderer.renderCustomTooltip(
+                filteredTooltip,
+                event.font,
+                event.x,
+                event.y,
+                width,
+                height,
+                event.itemStack,
+                path);
         };
     }
 

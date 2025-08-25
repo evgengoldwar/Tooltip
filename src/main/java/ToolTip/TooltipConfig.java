@@ -9,7 +9,7 @@ public class TooltipConfig {
     public static int BACKGROUND_COLOR = 0xFF2D2D2D;
     public static ResourceLocation BACKGROUND_TEXTURE = new ResourceLocation(
         "tooltipimprove",
-        "textures/gui/tooltip_border.png");
+        "textures/gui/tooltip_default.png");
     public static boolean USE_TEXTURE_BORDER = true;
     public static int BORDER_COLOR = 0xFFFFFFFF;
     public static int BORDER_THICKNESS = 1;
