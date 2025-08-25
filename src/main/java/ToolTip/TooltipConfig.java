@@ -6,54 +6,53 @@ import net.minecraft.util.ResourceLocation;
 public class TooltipConfig {
 //    0xFF2D2D2D; // Темно-серый
 
-    public static int BACKGROUND_COLOR = 0xFF2D2D2D; // Темно-серый
+    // Background
+    public static int BACKGROUND_COLOR = 0xFF2D2D2D;
     public static ResourceLocation BACKGROUND_TEXTURE = null;
 
-    public static int BORDER_TOP_COLOR = 0xFFFFFFFF;    // Красный
-    public static int BORDER_RIGHT_COLOR = 0xFFFFFFFF;  // Зеленый
-    public static int BORDER_BOTTOM_COLOR = 0xFFFFFFFF; // Синий
-    public static int BORDER_LEFT_COLOR = 0xFFFFFFFF;   // Желтый
+    // Borders
+    public static int BORDER_COLOR = 0xFFFFFFFF;
+    public static int BORDER_THICKNESS = 2;
 
-    public static int BORDER_TOP_THICKNESS = 2;
-    public static int BORDER_RIGHT_THICKNESS = 2;
-    public static int BORDER_BOTTOM_THICKNESS = 2;
-    public static int BORDER_LEFT_THICKNESS = 2;
+    // Item display
+    public static float ITEM_SCALE = 2.0f;
+    public static int ITEM_SIZE = 32;
 
-    public static int SEPARATOR_COLOR = 0x50FFFFFF;     // Полупрозрачный белый
-    public static int SEPARATOR_THICKNESS = 5;          // Тонкая линия
-
+    // Text colors
     public static String NAME_COLOR = EnumChatFormatting.GOLD.toString();
-    public static String TEXT_COLOR = EnumChatFormatting.WHITE.toString();
+    public static String OREDICT_COLOR = EnumChatFormatting.WHITE.toString();
+    public static String MODNAME_COLOR = EnumChatFormatting.BLUE.toString();
+    public static String TOOLTIP_COLOR = EnumChatFormatting.WHITE.toString();
 
-    public static void setBackgroundColor(int color) {
-        BACKGROUND_COLOR = color;
+    // Separator
+    public static int SEPARATOR_COLOR = 0x50FFFFFF;
+    public static int SEPARATOR_THICKNESS = 1;
+    public static int SEPARATOR_MARGIN = 2;
+
+    // Layout
+    public static int PADDING = 3;
+    public static int TEXT_MARGIN = 2;
+
+    public static void setItemScale(float scale) {
+        ITEM_SCALE = scale;
+        ITEM_SIZE = (int)(16 * scale);
     }
 
-    public static void setBackgroundTexture(ResourceLocation texture) {
-        BACKGROUND_TEXTURE = texture;
+    public static void setBorder(int color, int thickness) {
+        BORDER_COLOR = color;
+        BORDER_THICKNESS = thickness;
     }
 
-    public static void setBorderColors(int top, int right, int bottom, int left) {
-        BORDER_TOP_COLOR = top;
-        BORDER_RIGHT_COLOR = right;
-        BORDER_BOTTOM_COLOR = bottom;
-        BORDER_LEFT_COLOR = left;
-    }
-
-    public static void setBorderThickness(int top, int right, int bottom, int left) {
-        BORDER_TOP_THICKNESS = top;
-        BORDER_RIGHT_THICKNESS = right;
-        BORDER_BOTTOM_THICKNESS = bottom;
-        BORDER_LEFT_THICKNESS = left;
-    }
-
-    public static void setSeparator(int color, int thickness) {
+    public static void setSeparator(int color, int thickness, int margin) {
         SEPARATOR_COLOR = color;
         SEPARATOR_THICKNESS = thickness;
+        SEPARATOR_MARGIN = margin;
     }
 
-    public static void setTextColors(String nameColor, String textColor) {
+    public static void setTextColors(String nameColor, String oredictColor, String modnameColor, String tooltipColor) {
         NAME_COLOR = nameColor;
-        TEXT_COLOR = textColor;
+        OREDICT_COLOR = oredictColor;
+        MODNAME_COLOR = modnameColor;
+        TOOLTIP_COLOR = tooltipColor;
     }
 }

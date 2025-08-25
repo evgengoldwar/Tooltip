@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
 import org.lwjgl.opengl.GL11;
@@ -16,47 +17,49 @@ import java.util.List;
 
 public class TooltipRenderer {
 
+    private String oredictName = "";
+    private String modName = "";
+    private String displayName = "";
+    private static final RenderItem itemRenderer = new RenderItem();
+
+    public void setAdditionalInfo(String oredict, String mod, String displayName) {
+        this.oredictName = oredict;
+        this.modName = mod;
+        this.displayName = displayName;
+    }
+
     public void renderCustomTooltip(List<String> tooltip, FontRenderer font, int x, int y, int width, int height, ItemStack stack) {
         if (tooltip.isEmpty()) return;
 
         GL11.glPushMatrix();
-        setupGL();
+        GL11.glDisable(GL11.GL_DEPTH_TEST);
 
-        // Рендер фона
         drawRect(x - 3, y - 3, x + width + 3, y + height + 3, TooltipConfig.BACKGROUND_COLOR);
 
-        // Рендер границы
-        drawBorder(x - 4, y - 4, x + width + 4, y + height + 4,
-            TooltipConfig.BORDER_TOP_COLOR, TooltipConfig.BORDER_RIGHT_COLOR,
-            TooltipConfig.BORDER_BOTTOM_COLOR, TooltipConfig.BORDER_LEFT_COLOR,
-            TooltipConfig.BORDER_TOP_THICKNESS, TooltipConfig.BORDER_RIGHT_THICKNESS,
-            TooltipConfig.BORDER_BOTTOM_THICKNESS, TooltipConfig.BORDER_LEFT_THICKNESS);
+        drawBorder(x - 3, y - 3, x + width + 3, y + height + 3,
+            TooltipConfig.BORDER_COLOR, TooltipConfig.BORDER_THICKNESS);
 
-        // Рендер разделительной линии (простая линия от начала до конца)
-        if (tooltip.size() > 1) {
-            drawRect(x + 2 , y + 10, x + width - 2, y + 10 + TooltipConfig.BORDER_BOTTOM_THICKNESS, TooltipConfig.BORDER_BOTTOM_COLOR);
+        int itemX = x + TooltipConfig.PADDING;
+        int itemY = y + TooltipConfig.PADDING;
+        drawItemStack(stack, itemX, itemY);
+
+        int textX = itemX + TooltipConfig.ITEM_SIZE + TooltipConfig.TEXT_MARGIN;
+        int textY = itemY;
+        renderItemInfo(font, textX, textY);
+
+        int headerHeight = Math.max(TooltipConfig.ITEM_SIZE, getHeaderHeight(font));
+
+        boolean hasTooltipContent = tooltip.size() > 1;
+        if (hasTooltipContent) {
+            int separatorY = y + TooltipConfig.PADDING + headerHeight + TooltipConfig.SEPARATOR_MARGIN;
+            drawSeparator(x + TooltipConfig.PADDING, separatorY, width - TooltipConfig.PADDING * 2);
+
+            int tooltipStartY = separatorY + TooltipConfig.SEPARATOR_THICKNESS + TooltipConfig.SEPARATOR_MARGIN;
+            renderTooltipContent(tooltip, font, x + TooltipConfig.PADDING, tooltipStartY);
         }
 
-        drawItemStack(stack, x, y);
-
-        // Рендер текста
-        renderTooltipText(tooltip, font, x, y);
-
-        restoreGL();
-        GL11.glPopMatrix();
-    }
-
-    private void setupGL() {
-        GL11.glDisable(GL11.GL_LIGHTING);
-        GL11.glDisable(GL11.GL_DEPTH_TEST);
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-    }
-
-    private void restoreGL() {
         GL11.glEnable(GL11.GL_DEPTH_TEST);
-        GL11.glEnable(GL11.GL_LIGHTING);
-        GL11.glDisable(GL11.GL_BLEND);
+        GL11.glPopMatrix();
     }
 
     private void drawRect(int left, int top, int right, int bottom, int color) {
@@ -80,108 +83,130 @@ public class TooltipRenderer {
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
-    private void drawBorder(int left, int top, int right, int bottom,
-                            int topColor, int rightColor, int bottomColor, int leftColor,
-                            int topThickness, int rightThickness, int bottomThickness, int leftThickness) {
+    private void drawBorder(int left, int top, int right, int bottom, int color, int thickness) {
+        if (thickness <= 0) return;
 
-        // Верхняя граница
-        if (topThickness > 0) {
-            drawRect(left, top, right, top + topThickness, topColor);
+        drawRect(left, top, right, top + thickness, color);
+
+        drawRect(right - thickness, top, right, bottom, color);
+
+        drawRect(left, bottom - thickness, right, bottom, color);
+
+        drawRect(left, top, left + thickness, bottom, color);
+    }
+
+    private void drawSeparator(int x, int y, int width) {
+        drawRect(x, y, x + width, y + TooltipConfig.SEPARATOR_THICKNESS, TooltipConfig.SEPARATOR_COLOR);
+    }
+
+    private void renderItemInfo(FontRenderer font, int x, int y) {
+        int currentY = y;
+
+
+        font.drawStringWithShadow(TooltipConfig.NAME_COLOR + displayName, x, currentY, 0xFFFFFF);
+        currentY += 10;
+
+
+        if (!oredictName.isEmpty()) {
+            font.drawStringWithShadow(TooltipConfig.OREDICT_COLOR + oredictName, x, currentY, 0xFFFFFF);
+            currentY += 10;
         }
 
-        // Правая граница
-        if (rightThickness > 0) {
-            drawRect(right - rightThickness, top, right, bottom, rightColor);
-        }
 
-        // Нижняя граница
-        if (bottomThickness > 0) {
-            drawRect(left, bottom - bottomThickness, right, bottom, bottomColor);
-        }
-
-        // Левая граница
-        if (leftThickness > 0) {
-            drawRect(left, top, left + leftThickness, bottom, leftColor);
+        if (!modName.isEmpty()) {
+            font.drawStringWithShadow(TooltipConfig.MODNAME_COLOR + modName, x, currentY, 0xFFFFFF);
         }
     }
 
-    private void drawSimpleLine(int startX, int y, int endX, int endY, int thickness, int color) {
-        float alpha = (float)(color >> 24 & 255) / 255.0F;
-        float red = (float)(color >> 16 & 255) / 255.0F;
-        float green = (float)(color >> 8 & 255) / 255.0F;
-        float blue = (float)(color & 255) / 255.0F;
-
-        GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glColor4f(red, green, blue, alpha);
-
-        Tessellator tessellator = Tessellator.instance;
-        int halfThickness = thickness / 2;
-
-        // Простая прямоугольная линия от начала до конца
-        tessellator.startDrawingQuads();
-        tessellator.addVertex(startX, y - halfThickness, 0);
-        tessellator.addVertex(endX, y - halfThickness, 0);
-        tessellator.addVertex(endX, y + halfThickness, 0);
-        tessellator.addVertex(startX, y + halfThickness, 0);
-        tessellator.draw();
-
-        GL11.glEnable(GL11.GL_TEXTURE_2D);
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+    private void renderTooltipContent(List<String> tooltip, FontRenderer font, int x, int y) {
+        for (int i = 1; i < tooltip.size(); i++) {
+            String line = tooltip.get(i);
+            font.drawStringWithShadow(TooltipConfig.TOOLTIP_COLOR + line, x, y - 5 + i * 10, 0xFFFFFF);
+        }
     }
 
-    private void renderTooltipText(List<String> tooltip, FontRenderer font, int x, int y) {
-        if (!tooltip.isEmpty()) {
-            // Рендер названия предмета
-            String itemName = tooltip.get(0);
-            font.drawStringWithShadow(TooltipConfig.NAME_COLOR + itemName, x, y, 0xFFFFFF);
-
-            // Рендер остального текста (с отступом от линии)
-            for (int i = 1; i < tooltip.size(); i++) {
-                String line = tooltip.get(i);
-                font.drawStringWithShadow(TooltipConfig.TEXT_COLOR + line, x, y + 15 + (i - 1) * 10, 0xFFFFFF);
-            }
-        }
+    private int getHeaderHeight(FontRenderer font) {
+        int height = 10;
+        if (!oredictName.isEmpty()) height += 10;
+        if (!modName.isEmpty()) height += 10;
+        return height;
     }
 
     public int calculateTooltipWidth(List<String> tooltip, FontRenderer font) {
-        int width = 0;
-        for (String line : tooltip) {
-            width = Math.max(width, font.getStringWidth(line));
+        int itemDisplayWidth = (int)(TooltipConfig.ITEM_SIZE * TooltipConfig.ITEM_SCALE);
+        int width = itemDisplayWidth + TooltipConfig.TEXT_MARGIN * 3;
+
+        width = Math.max(width, font.getStringWidth(displayName) + itemDisplayWidth + TooltipConfig.TEXT_MARGIN * 2);
+        if (!oredictName.isEmpty()) {
+            width = Math.max(width, font.getStringWidth(oredictName) + itemDisplayWidth + TooltipConfig.TEXT_MARGIN * 2);
         }
-        return Math.max(width + 8, 100);
+        if (!modName.isEmpty()) {
+            width = Math.max(width, font.getStringWidth(modName) + itemDisplayWidth + TooltipConfig.TEXT_MARGIN * 2);
+        }
+
+        for (String line : tooltip) {
+            width = Math.max(width, font.getStringWidth(line) + TooltipConfig.PADDING * 2);
+        }
+
+        return width + TooltipConfig.PADDING * 2;
     }
 
-    public int calculateTooltipHeight(List<String> tooltip) {
-        return Math.max(tooltip.size() * 10 + 15, 35);
+    public int calculateTooltipHeight(List<String> tooltip, FontRenderer font) {
+        int height = TooltipConfig.PADDING * 2;
+
+        int headerHeight = Math.max(TooltipConfig.ITEM_SIZE, getHeaderHeight(font));
+        height += headerHeight;
+
+        boolean hasTooltipContent = tooltip.size() > 1 || (tooltip.size() == 1 && !tooltip.get(0).isEmpty());
+        if (hasTooltipContent) {
+            height += TooltipConfig.SEPARATOR_THICKNESS + TooltipConfig.SEPARATOR_MARGIN * 2;
+            height += tooltip.size() * 10;
+        }
+
+        return height;
     }
 
     public void drawItemStack(ItemStack stack, int x, int y) {
+        if (stack == null) return;
 
-        NEIClientUtils.gl2DRenderContext(() -> {
-            GuiDraw.drawRect(x, y, 34, 34, 0x66555555);
-
-            GuiDraw.drawString(stack.getDisplayName(), x + 36, y, 0xffffffff);
-
-//            GuiDraw.drawString(this.identifier, x + 36, y + 9 * 1, 0xee555555);
-
-            if (stack.stackSize != Integer.MAX_VALUE) {
-//                GuiDraw.drawString(stack.itemCount, x + 36, y + 9 * 2, 0xee555555);
-            }
-
-//            GuiDraw.drawString(this.modName, x + 36, y + 9 * 3, 0xff5555ff);
-        });
-
-        GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
         GL11.glPushMatrix();
-        RenderHelper.enableGUIStandardItemLighting();
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 
-        GL11.glScaled(2, 2, 3);
-        GL11.glTranslatef((x + 1) / 2f, (y + 1) / 2f, 0);
+        GL11.glTranslatef(x, y, 0);
+        GL11.glScalef(TooltipConfig.ITEM_SCALE, TooltipConfig.ITEM_SCALE, 1.0f);
+        GL11.glTranslatef(-x, -y, 0);
+
+        boolean depthEnabled = GL11.glGetBoolean(GL11.GL_DEPTH_TEST);
+
+        GL11.glDisable(GL11.GL_DEPTH_TEST);
+
+        RenderHelper.enableGUIStandardItemLighting();
         GL11.glEnable(GL12.GL_RESCALE_NORMAL);
 
-        GuiContainerManager.drawItem(0, 0, stack, true, "");
+        GL11.glTranslatef(0, 0, 300);
+
+        itemRenderer.renderItemAndEffectIntoGUI(
+            Minecraft.getMinecraft().fontRenderer,
+            Minecraft.getMinecraft().getTextureManager(),
+            stack,
+            x,
+            y
+        );
+
+        itemRenderer.renderItemOverlayIntoGUI(
+            Minecraft.getMinecraft().fontRenderer,
+            Minecraft.getMinecraft().getTextureManager(),
+            stack,
+            x,
+            y
+        );
+
+        RenderHelper.disableStandardItemLighting();
+
+        if (depthEnabled) {
+            GL11.glEnable(GL11.GL_DEPTH_TEST);
+        }
 
         GL11.glPopMatrix();
-        GL11.glPopAttrib();
     }
 }
