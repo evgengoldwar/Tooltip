@@ -20,7 +20,7 @@ public class TooltipConfig {
 
     // Text colors
     public static String NAME_COLOR = EnumChatFormatting.GOLD.toString();
-    public static String OREDICT_COLOR = EnumChatFormatting.WHITE.toString();
+    public static String OREDICT_COLOR = EnumChatFormatting.GRAY.toString();
     public static String MODNAME_COLOR = EnumChatFormatting.BLUE.toString();
     public static String TOOLTIP_COLOR = EnumChatFormatting.WHITE.toString();
 
