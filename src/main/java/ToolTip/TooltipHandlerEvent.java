@@ -28,8 +28,6 @@ public class TooltipHandlerEvent {
         event.alternativeRenderer = tooltip -> {
             if (tooltip.isEmpty()) return;
 
-            tooltip.add("32_127");
-
             String displayName = event.itemStack.getDisplayName();
             String oredict = getIdentifier(event.itemStack);
             String modName = nameFromStack(event.itemStack.getItem());
