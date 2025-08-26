@@ -110,12 +110,8 @@ public class TooltipRenderer {
                 TooltipConfig.BORDER_THICKNESS);
         }
 
-        // Render
-        GL11.glPushMatrix();
-        GL11.glEnable(GL11.GL_DEPTH_TEST);
-        GL11.glTranslatef(0, 0, 100);
-        drawItemStack(stack, itemX, itemY);
-        GL11.glPopMatrix();
+        // Render ItemStack
+        renderItemStack(stack, itemX, itemY);
         renderItemInfo(font, textX, textY);
 
         // Render Tooltip
@@ -166,30 +162,34 @@ public class TooltipRenderer {
         }
     }
 
-    public void drawItemStack(ItemStack stack, int x, int y) {
+    public void renderItemStack(ItemStack stack, int x, int y) {
         if (stack == null) return;
+
+        float scale = TooltipConfig.ITEM_SCALE;
 
         GL11.glPushMatrix();
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 
-        GL11.glTranslatef(x, y, 0);
-        GL11.glScalef(TooltipConfig.ITEM_SCALE, TooltipConfig.ITEM_SCALE, 1.0f);
-        GL11.glTranslatef(-x, -y, 0);
-
         boolean depthEnabled = GL11.glGetBoolean(GL11.GL_DEPTH_TEST);
-        GL11.glDisable(GL11.GL_DEPTH_TEST);
+
+        GL11.glEnable(GL11.GL_DEPTH_TEST);
+        GL11.glDepthFunc(GL11.GL_LEQUAL);
+
+        GL11.glScalef(scale, scale, 1.0f);
+
+        GL11.glTranslatef(x / scale, y / scale, 0);
 
         RenderHelper.enableGUIStandardItemLighting();
         GL11.glEnable(GL12.GL_RESCALE_NORMAL);
 
         Minecraft mc = Minecraft.getMinecraft();
-        itemRenderer.renderItemAndEffectIntoGUI(mc.fontRenderer, mc.getTextureManager(), stack, x, y);
-        itemRenderer.renderItemOverlayIntoGUI(mc.fontRenderer, mc.getTextureManager(), stack, x, y);
+        itemRenderer.renderItemAndEffectIntoGUI(mc.fontRenderer, mc.getTextureManager(), stack, 0, 0);
+        itemRenderer.renderItemOverlayIntoGUI(mc.fontRenderer, mc.getTextureManager(), stack, 0, 0);
 
         RenderHelper.disableStandardItemLighting();
 
-        if (depthEnabled) {
-            GL11.glEnable(GL11.GL_DEPTH_TEST);
+        if (!depthEnabled) {
+            GL11.glDisable(GL11.GL_DEPTH_TEST);
         }
 
         GL11.glPopMatrix();

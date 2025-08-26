@@ -24,14 +24,13 @@ public class TooltipHandlerEvent {
 
     private final TooltipRenderer renderer = new TooltipRenderer();
     private final TooltipPositionCalculator tooltipPositionCalculator = new TooltipPositionCalculator();
-    private final boolean advancedSettings = Minecraft.getMinecraft().gameSettings.advancedItemTooltips;
 
     @SubscribeEvent
     public void onRenderTooltip(RenderTooltipEvent event) {
         event.alternativeRenderer = tooltip -> {
             if (tooltip.isEmpty()) return;
 
-            // tooltip.add("2,147,483,640");
+            boolean advancedSettings = Minecraft.getMinecraft().gameSettings.advancedItemTooltips;
 
             // Variables
             String displayName = event.itemStack.getDisplayName();
