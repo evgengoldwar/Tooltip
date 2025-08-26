@@ -30,7 +30,7 @@ public class TooltipHandlerEvent {
         event.alternativeRenderer = tooltip -> {
             if (tooltip.isEmpty()) return;
 
-            boolean advancedSettings = Minecraft.getMinecraft().gameSettings.advancedItemTooltips;
+            tooltip.add("2,147,483,640");
 
             // Variables
             String displayName = event.itemStack.getDisplayName();
@@ -38,6 +38,7 @@ public class TooltipHandlerEvent {
             String modName = nameFromStack(event.itemStack.getItem());
             List<String> filteredTooltip = new ArrayList<>();
             boolean isFirstLine = true;
+            boolean advancedSettings = Minecraft.getMinecraft().gameSettings.advancedItemTooltips;
 
             // Setter for TooltipRenderer
             renderer.setAdditionalInfo(oreDict, modName, displayName, advancedSettings);
