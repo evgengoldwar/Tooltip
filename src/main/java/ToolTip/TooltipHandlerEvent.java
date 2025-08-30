@@ -30,7 +30,7 @@ public class TooltipHandlerEvent {
         event.alternativeRenderer = tooltip -> {
             if (tooltip.isEmpty()) return;
 
-//            tooltip.add("2,147,483,640");
+            tooltip.add("test");
 
             // Variables
             String displayName = event.itemStack.getDisplayName();
@@ -65,8 +65,8 @@ public class TooltipHandlerEvent {
                 .calculateTooltipHeight(filteredTooltip, event.font, displayName, oreDict, modName, advancedSettings);
 
             // Get textures if the ModName or Tier was found
-            ResourceLocation path = null;
-            if (modNameFromList.isPresent()) path = ModTextures.getTextureForMod(modNameFromList.get());
+            ModTextures modTextures = null;
+            if (modNameFromList.isPresent()) modTextures = ModTextures.getTextureForMod(modNameFromList.get());
 
             // Render tooltip
             renderer.renderCustomTooltip(
@@ -77,7 +77,7 @@ public class TooltipHandlerEvent {
                 width,
                 height,
                 event.itemStack,
-                path);
+                modTextures);
         };
     }
 

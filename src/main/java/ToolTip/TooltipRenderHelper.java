@@ -48,52 +48,62 @@ public class TooltipRenderHelper {
     }
 
     public void drawTexturedBorder(int x, int y, int width, int height, ResourceLocation texture) {
-        if (texture == null) texture = TooltipConfig.BORDER_TEXTURE;
-        bind(texture);
-
-        float texWidth = 32;
-        float texHeight = 32;
 
         Tessellator tessellator = Tessellator.instance;
+        int texWidth = 64;
+        int texHeight = 64;
+        if (texture == null) {
+            texture = TooltipConfig.BORDER_TEXTURE;
+        }
+        bind(texture);
+
+
 
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 //        GL11.glEnable(GL11.GL_BLEND);
 //        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
 
-        renderQuadTexture(tessellator, x - 1, y - 1, 3, 3, 1, 1, 4, 4, texWidth, texHeight);
+        // Top Left Angle
+        renderQuadTexture(tessellator, x - 1, y - 1, 3, 3, 17, 17, 20, 20, texWidth, texHeight);
+        // Top Right Angle
+        renderQuadTexture(tessellator, x + width - 2, y - 1, 3, 3, 44, 17, 47, 20, texWidth, texHeight);
+        // Bottom Left Angle
+        renderQuadTexture(tessellator, x - 1, y + height - 2, 3, 3, 17, 44, 20, 47, texWidth, texHeight);
+        // Bottom Right Angle
+        renderQuadTexture(tessellator, x + width - 2, y + height - 2, 3, 3, 44, 44, 47, 47, texWidth, texHeight);
 
-        renderQuadTexture(tessellator, x + width - 2, y - 1, 3, 3, 28, 1, 31, 4, texWidth, texHeight);
 
-        renderQuadTexture(tessellator, x - 1, y + height - 2, 3, 3, 1, 28, 4, 31, texWidth, texHeight);
+        // Left Border
+        renderQuadTexture(tessellator, x - 1, y + 2, 1, height - 3d, 17, 20, 18, 44, texWidth, texHeight);
+        // Right Border
+        renderQuadTexture(tessellator, x + width, y + 2, 1, height - 3d, 46, 20, 47, 44, texWidth, texHeight);
 
-        renderQuadTexture(tessellator, x + width - 2, y + height - 2, 3, 3, 28, 28, 31, 31, texWidth, texHeight);
 
-
-
-        renderQuadTexture(tessellator, x - 1, y + 2, 1, height - 3d, 1, 4, 2, 28, texWidth, texHeight);
-
-        renderQuadTexture(tessellator, x + width, y + 2, 1, height - 3d, 30, 4, 31, 28, texWidth, texHeight);
-
-        renderQuadTexture(tessellator, x + 2, y - 1, ((double) width / 2) - 8.5d, 1, 4, 1, 11, 2, texWidth, texHeight);
+        // Top Left Line
+        renderQuadTexture(tessellator, x + 2, y - 1, ((double) width / 2) - 8.5d, 1, 20, 17, 27, 18, texWidth, texHeight);
+        // Top Right Line
         renderQuadTexture(
             tessellator,
             x + ((double) width / 2) + 8.5d,
             y - 1,
             ((double) width / 2) - 10.5d,
             1,
-            21,
-            1,
-            28,
-            2,
+            37,
+            17,
+            44,
+            18,
             texWidth,
             texHeight);
 
-        renderQuadTexture(tessellator, x + 2, y + height, width - 3d, 1, 3, 30, 28, 31, texWidth, texHeight);
+        // Bottom Line
+        renderQuadTexture(tessellator, x + 2, y + height, width - 3d, 1, 19, 46, 44, 47, texWidth, texHeight);
 
 
-        renderQuadTexture(tessellator, x + ((double) width / 2) - 6.5d, y, 2, 1, 11, 2, 13, 3, texWidth, texHeight);
-        renderQuadTexture(tessellator, x + ((double) width / 2) + 6.5d, y, 2, 1, 19, 2, 21, 3, texWidth, texHeight);
+        // Top Middle Left Angle
+        renderQuadTexture(tessellator, x + ((double) width / 2) - 6.5d, y, 2, 1, 27, 18, 29, 19, texWidth, texHeight);
+        // Top Middle Right Angle
+        renderQuadTexture(tessellator, x + ((double) width / 2) + 6.5d, y, 2, 1, 35, 18, 37, 19, texWidth, texHeight);
 
 //        GL11.glDisable(GL11.GL_BLEND);
     }
@@ -135,10 +145,13 @@ public class TooltipRenderHelper {
         bind(texture);
         GL11.glColor4f(1f, 1f, 1f, 1f);
 
-        int size = 16;
-        int ix = x + (width - size) / 2 + 2;
-        int iy = y - size + 3;
-        renderQuad(tessellator, ix, iy, size, size, 0, 0, size, size, 16, 16);
+        int textureWidth = 32;
+        int textureHeight = 16;
+        int paddingWidth = 2;
+        int paddingHeight = 1;
+        int ix = x + (width - textureWidth) / 2 + paddingWidth;
+        int iy = y - textureHeight + paddingHeight;
+        renderQuad(tessellator, ix, iy, textureWidth, textureHeight, 0, 0, 31, 15, textureWidth, textureHeight);
     }
 
     private static void renderQuad(Tessellator tessellator, double x, double y, double width, double height,

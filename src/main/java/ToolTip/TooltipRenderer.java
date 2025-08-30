@@ -35,7 +35,7 @@ public class TooltipRenderer {
     }
 
     public void renderCustomTooltip(List<String> tooltip, FontRenderer font, int x, int y, int width, int height,
-        ItemStack stack, ResourceLocation resourceLocation) {
+        ItemStack stack, ModTextures modTextures) {
 
         // Variables
         Minecraft mc = Minecraft.getMinecraft();
@@ -43,6 +43,15 @@ public class TooltipRenderer {
         int screenHeight = res.getScaledHeight();
         int maxAvailableHeight = screenHeight - y - 10;
         List<List<String>> pages = paginationHelper.splitTooltipByPages(tooltip, maxAvailableHeight);
+        ResourceLocation borderTexture = null;
+        ResourceLocation separatorTexture = null;
+        ResourceLocation iconTexture = null;
+
+        if (modTextures != null) {
+            borderTexture = modTextures.getBorderTextureTexture();
+            separatorTexture = modTextures.getSeparatorTexture();
+            iconTexture = modTextures.getIconTexture();
+        }
 
         // Clear Pagination
         if (tooltip == null || stack == null) {
@@ -97,8 +106,8 @@ public class TooltipRenderer {
 
         // Check Ugly or Fancy border renderer
         if (TooltipConfig.USE_TEXTURE_BORDER) {
-            renderHelper.drawTexturedBorder(finalX, finalY, pageWidth, pageHeight, TooltipConfig.BORDER_TEXTURE);
-            renderHelper.drawTopIconCentered(finalX, finalY, pageWidth, TooltipConfig.TOP_ICON_TEXTURE);
+            renderHelper.drawTexturedBorder(finalX, finalY, pageWidth, pageHeight, borderTexture);
+            renderHelper.drawTopIconCentered(finalX, finalY, pageWidth, iconTexture);
         } else {
             renderHelper.drawBorder(
                 finalX,
@@ -123,7 +132,7 @@ public class TooltipRenderer {
                     finalX + TooltipConfig.PADDING,
                     separatorY,
                     pageWidth - TooltipConfig.PADDING * 2,
-                    null);
+                    separatorTexture);
             } else {
                 renderHelper.drawSeparator(finalX + TooltipConfig.PADDING, separatorY, pageWidth - TooltipConfig.PADDING * 2);
             }

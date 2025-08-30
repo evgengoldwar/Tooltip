@@ -30,9 +30,9 @@ public class TooltipConfig {
 
 
     // Default texture
-    public static ResourceLocation BORDER_TEXTURE = new ResourceLocation("tooltipimprove", "textures/gui/default/tooltip_border.png");
-    public static ResourceLocation SEPARATOR_TEXTURE = new ResourceLocation("tooltipimprove", "textures/gui/default/tooltip_separator.png");
-    public static ResourceLocation TOP_ICON_TEXTURE = new ResourceLocation("tooltipimprove", "textures/gui/default/tooltip_top_icon.png");
+    public static ResourceLocation BORDER_TEXTURE = new ResourceLocation("tooltipimprove", "textures/gui/default/border.png");
+    public static ResourceLocation SEPARATOR_TEXTURE = new ResourceLocation("tooltipimprove", "textures/gui/default/separator.png");
+    public static ResourceLocation TOP_ICON_TEXTURE = new ResourceLocation("tooltipimprove", "textures/gui/default/icon.png");
 
 
 }
