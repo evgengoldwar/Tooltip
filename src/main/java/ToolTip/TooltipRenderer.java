@@ -36,6 +36,7 @@ public class TooltipRenderer {
 
     public void renderCustomTooltip(List<String> tooltip, FontRenderer font, int x, int y, int width, int height,
         ItemStack stack, ResourceLocation resourceLocation) {
+
         // Variables
         Minecraft mc = Minecraft.getMinecraft();
         ScaledResolution res = new ScaledResolution(mc, mc.displayWidth, mc.displayHeight);
@@ -50,9 +51,6 @@ public class TooltipRenderer {
             return;
         }
         paginationHelper.setTooltipActive(true);
-
-        // Set default textures when ModName or Tier not found
-        if (resourceLocation == null) resourceLocation = TooltipConfig.BACKGROUND_TEXTURE;
 
         // Clear Pagination pages
         if (itemStack != stack) {
@@ -72,34 +70,35 @@ public class TooltipRenderer {
             currentPage.add(EnumChatFormatting.ITALIC + "Use Z to navigate");
         }
 
-        int pageWidth = positionCalculator
-            .calculateTooltipWidth(currentPage, font, displayName, oreDictName, modName, advancedSettings);
-        int pageHeight = positionCalculator
-            .calculateTooltipHeight(currentPage, font, displayName, oreDictName, modName, advancedSettings);
-
+        // Variables
+        // spotless:off
+        int pageWidth = positionCalculator.calculateTooltipWidth(currentPage, font, displayName, oreDictName, modName, advancedSettings);
+        int pageHeight = positionCalculator.calculateTooltipHeight(currentPage, font, displayName, oreDictName, modName, advancedSettings);
         int[] position = positionCalculator.calculateSafePosition(x, y, pageWidth, pageHeight);
         int finalX = position[0];
         int finalY = position[1];
         int itemX = finalX + TooltipConfig.PADDING;
         int itemY = finalY + TooltipConfig.PADDING;
-        int textX = itemX + TooltipConfig.ITEM_SIZE + TooltipConfig.TEXT_MARGIN;
+        int textX = itemX + (TooltipConfig.USE_ITEM_RENDER ? TooltipConfig.ITEM_SIZE : 0) + TooltipConfig.TEXT_MARGIN;
         int textY = itemY;
         boolean hasTooltipContent = positionCalculator.hasActualTooltipContent(currentPage);
-        int headerHeight = positionCalculator
-            .getHeaderHeight(font, displayName, oreDictName, modName, advancedSettings);
+        int headerHeight = positionCalculator.getHeaderHeight(font, displayName, oreDictName, modName, advancedSettings);
         int separatorY = finalY + TooltipConfig.PADDING + headerHeight + TooltipConfig.SEPARATOR_MARGIN;
         int tooltipStartY = separatorY + TooltipConfig.SEPARATOR_THICKNESS + TooltipConfig.SEPARATOR_MARGIN;
+        // spotless:on
 
         // OpenGL render
         GL11.glPushMatrix();
         GL11.glDisable(GL11.GL_DEPTH_TEST);
         GL11.glTranslatef(0, 0, 500);
 
+        // Background
         renderHelper.drawRect(finalX, finalY, finalX + pageWidth, finalY + pageHeight, TooltipConfig.BACKGROUND_COLOR);
 
-        // Check Ugly or Fancy renderer
+        // Check Ugly or Fancy border renderer
         if (TooltipConfig.USE_TEXTURE_BORDER) {
-            renderHelper.drawTexturedTooltipBorder(finalX, finalY, pageWidth, pageHeight, resourceLocation);
+            renderHelper.drawTexturedBorder(finalX, finalY, pageWidth, pageHeight, TooltipConfig.BORDER_TEXTURE);
+            renderHelper.drawTopIconCentered(finalX, finalY, pageWidth, TooltipConfig.TOP_ICON_TEXTURE);
         } else {
             renderHelper.drawBorder(
                 finalX,
@@ -111,23 +110,26 @@ public class TooltipRenderer {
         }
 
         // Render ItemStack
-        renderItemStack(stack, itemX, itemY);
+        if (TooltipConfig.USE_ITEM_RENDER) {
+            renderItemStack(stack, itemX, itemY);
+        }
         renderItemInfo(font, textX, textY);
 
         // Render Tooltip
+        // spotless:off
         if (hasTooltipContent) {
             if (TooltipConfig.USE_TEXTURE_BORDER) {
                 renderHelper.drawTexturedSeparator(
                     finalX + TooltipConfig.PADDING,
                     separatorY,
                     pageWidth - TooltipConfig.PADDING * 2,
-                    resourceLocation);
+                    null);
             } else {
-                renderHelper
-                    .drawSeparator(finalX + TooltipConfig.PADDING, separatorY, pageWidth - TooltipConfig.PADDING * 2);
+                renderHelper.drawSeparator(finalX + TooltipConfig.PADDING, separatorY, pageWidth - TooltipConfig.PADDING * 2);
             }
             renderTooltipContent(currentPage, font, finalX + TooltipConfig.PADDING, tooltipStartY);
         }
+        // spotless:on
 
         GL11.glEnable(GL11.GL_DEPTH_TEST);
         GL11.glPopMatrix();
@@ -164,6 +166,8 @@ public class TooltipRenderer {
 
     public void renderItemStack(ItemStack stack, int x, int y) {
         if (stack == null) return;
+        ItemStack copyStack = stack.copy();
+        copyStack.stackSize = 0;
 
         float scale = TooltipConfig.ITEM_SCALE;
 
@@ -183,8 +187,8 @@ public class TooltipRenderer {
         GL11.glEnable(GL12.GL_RESCALE_NORMAL);
 
         Minecraft mc = Minecraft.getMinecraft();
-        itemRenderer.renderItemAndEffectIntoGUI(mc.fontRenderer, mc.getTextureManager(), stack, 0, 0);
-        itemRenderer.renderItemOverlayIntoGUI(mc.fontRenderer, mc.getTextureManager(), stack, 0, 0);
+        itemRenderer.renderItemAndEffectIntoGUI(mc.fontRenderer, mc.getTextureManager(), copyStack, 0, 0);
+        itemRenderer.renderItemOverlayIntoGUI(mc.fontRenderer, mc.getTextureManager(), copyStack, 0, 0);
 
         RenderHelper.disableStandardItemLighting();
 

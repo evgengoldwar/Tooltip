@@ -38,7 +38,7 @@ public class TooltipPositionCalculator {
         if (!displayName.isEmpty()) height += 10;
         if (!oredictName.isEmpty() && advancedSettings) height += 10;
         if (!modName.isEmpty()) height += 10;
-        return Math.max(height, TooltipConfig.ITEM_SIZE);
+        return Math.max(height, TooltipConfig.USE_ITEM_RENDER ? TooltipConfig.ITEM_SIZE : 0);
     }
 
     public int calculateTooltipWidth(List<String> tooltip, FontRenderer font, String displayName, String oredictName,

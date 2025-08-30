@@ -30,7 +30,7 @@ public class TooltipHandlerEvent {
         event.alternativeRenderer = tooltip -> {
             if (tooltip.isEmpty()) return;
 
-            tooltip.add("2,147,483,640");
+//            tooltip.add("2,147,483,640");
 
             // Variables
             String displayName = event.itemStack.getDisplayName();

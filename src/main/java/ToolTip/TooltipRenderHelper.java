@@ -8,89 +8,156 @@ import org.lwjgl.opengl.GL11;
 
 public class TooltipRenderHelper {
 
+    private static void bind(ResourceLocation texture) {
+        Minecraft.getMinecraft().getTextureManager().bindTexture(texture);
+    }
+
     public void drawRect(int left, int top, int right, int bottom, int color) {
-        float alpha = (float) (color >> 24 & 255) / 255.0F;
-        float red = (float) (color >> 16 & 255) / 255.0F;
-        float green = (float) (color >> 8 & 255) / 255.0F;
-        float blue = (float) (color & 255) / 255.0F;
+        int t;
+        if (left < right) { t = left; left = right; right = t; }
+        if (top < bottom) { t = top; top = bottom; bottom = t; }
+
+        float a = (color >> 24 & 255) / 255.0F;
+        float r = (color >> 16 & 255) / 255.0F;
+        float g = (color >> 8 & 255) / 255.0F;
+        float b = (color & 255) / 255.0F;
+
 
         GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glColor4f(red, green, blue, alpha);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GL11.glColor4f(r, g, b, a);
 
         Tessellator tessellator = Tessellator.instance;
         tessellator.startDrawingQuads();
-        tessellator.addVertex(left, bottom, 0);
-        tessellator.addVertex(right, bottom, 0);
-        tessellator.addVertex(right, top, 0);
-        tessellator.addVertex(left, top, 0);
+        tessellator.addVertex(left, bottom, 0.0D);
+        tessellator.addVertex(right, bottom, 0.0D);
+        tessellator.addVertex(right, top, 0.0D);
+        tessellator.addVertex(left, top, 0.0D);
         tessellator.draw();
 
+        GL11.glDisable(GL11.GL_BLEND);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     public void drawBorder(int left, int top, int right, int bottom, int color, int thickness) {
-        if (thickness <= 0) return;
-
         drawRect(left, top, right, top + thickness, color);
-        drawRect(right - thickness, top, right, bottom, color);
         drawRect(left, bottom - thickness, right, bottom, color);
         drawRect(left, top, left + thickness, bottom, color);
+        drawRect(right - thickness, top, right, bottom, color);
+    }
+
+    public void drawTexturedBorder(int x, int y, int width, int height, ResourceLocation texture) {
+        if (texture == null) texture = TooltipConfig.BORDER_TEXTURE;
+        bind(texture);
+
+        float texWidth = 32;
+        float texHeight = 32;
+
+        Tessellator tessellator = Tessellator.instance;
+
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+//        GL11.glEnable(GL11.GL_BLEND);
+//        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+
+        renderQuadTexture(tessellator, x - 1, y - 1, 3, 3, 1, 1, 4, 4, texWidth, texHeight);
+
+        renderQuadTexture(tessellator, x + width - 2, y - 1, 3, 3, 28, 1, 31, 4, texWidth, texHeight);
+
+        renderQuadTexture(tessellator, x - 1, y + height - 2, 3, 3, 1, 28, 4, 31, texWidth, texHeight);
+
+        renderQuadTexture(tessellator, x + width - 2, y + height - 2, 3, 3, 28, 28, 31, 31, texWidth, texHeight);
+
+
+
+        renderQuadTexture(tessellator, x - 1, y + 2, 1, height - 3d, 1, 4, 2, 28, texWidth, texHeight);
+
+        renderQuadTexture(tessellator, x + width, y + 2, 1, height - 3d, 30, 4, 31, 28, texWidth, texHeight);
+
+        renderQuadTexture(tessellator, x + 2, y - 1, ((double) width / 2) - 8.5d, 1, 4, 1, 11, 2, texWidth, texHeight);
+        renderQuadTexture(
+            tessellator,
+            x + ((double) width / 2) + 8.5d,
+            y - 1,
+            ((double) width / 2) - 10.5d,
+            1,
+            21,
+            1,
+            28,
+            2,
+            texWidth,
+            texHeight);
+
+        renderQuadTexture(tessellator, x + 2, y + height, width - 3d, 1, 3, 30, 28, 31, texWidth, texHeight);
+
+
+        renderQuadTexture(tessellator, x + ((double) width / 2) - 6.5d, y, 2, 1, 11, 2, 13, 3, texWidth, texHeight);
+        renderQuadTexture(tessellator, x + ((double) width / 2) + 6.5d, y, 2, 1, 19, 2, 21, 3, texWidth, texHeight);
+
+//        GL11.glDisable(GL11.GL_BLEND);
+    }
+
+
+    public void drawTexturedSeparator(int x, int y, int width, ResourceLocation texture) {
+        if (texture == null) texture = TooltipConfig.SEPARATOR_TEXTURE;
+
+        Tessellator tessellator = Tessellator.instance;
+
+        bind(texture);
+        GL11.glColor4f(1f, 1f, 1f, 1f);
+
+        int h = 7;
+        int sliceSide = 3;
+        int centerUW = 26;
+        int texW = 32;
+        int texH = 16;
+        int v = 4;
+        int innerW = Math.max(0, width - 2 * sliceSide);
+        y -= 4;
+
+        renderQuad(tessellator, x, y, sliceSide, h, 0, v, sliceSide, v + h, texW, texH);
+
+        renderQuad(tessellator, x + sliceSide, y, innerW, h, sliceSide, v, sliceSide + centerUW, v + h, texW, texH);
+
+        renderQuad(tessellator, x + width - sliceSide, y, sliceSide, h, texW - sliceSide, v, texW, v + h, texW, texH);
     }
 
     public void drawSeparator(int x, int y, int width) {
         drawRect(x, y, x + width, y + TooltipConfig.SEPARATOR_THICKNESS, TooltipConfig.SEPARATOR_COLOR);
     }
 
-    public void drawTexturedTooltipBorder(int x, int y, int width, int height, ResourceLocation resourceLocation) {
-        if (TooltipConfig.BACKGROUND_TEXTURE == null) return;
-
-        Minecraft mc = Minecraft.getMinecraft();
-        mc.getTextureManager()
-            .bindTexture(resourceLocation);
-
-        float texWidth = 64.0f;
-        float texHeight = 64.0f;
-
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+    public void drawTopIconCentered(int x, int y, int width, ResourceLocation texture) {
+        if (texture == null) texture = TooltipConfig.TOP_ICON_TEXTURE;
 
         Tessellator tessellator = Tessellator.instance;
 
-        renderTexturedQuad(tessellator, x - 1, y - 1, 3, 3, 16, 16, 19, 19, texWidth, texHeight);
-        renderTexturedQuad(tessellator, x + width - 2, y - 1, 3, 3, 43, 16, 46, 19, texWidth, texHeight);
-        renderTexturedQuad(tessellator, x - 1, y + height - 2, 3, 3, 16, 43, 19, 46, texWidth, texHeight);
-        renderTexturedQuad(tessellator, x + width - 2, y + height - 2, 3, 3, 43, 43, 46, 46, texWidth, texHeight);
+        bind(texture);
+        GL11.glColor4f(1f, 1f, 1f, 1f);
 
-        renderTexturedQuad(tessellator, x - 1, y + 2, 1, height - 3, 16, 19, 17, 43, texWidth, texHeight);
-        renderTexturedQuad(tessellator, x + width, y + 2, 1, height - 3, 45, 19, 46, 43, texWidth, texHeight);
-
-        renderTexturedQuad(tessellator, x + 2, y - 1, (width / 2) - 8.5, 1, 19, 16, 26, 17, texWidth, texHeight);
-        renderTexturedQuad(
-            tessellator,
-            x + (width / 2) + 8.5,
-            y - 1,
-            (width / 2) - 10.5,
-            1,
-            36,
-            16,
-            43,
-            17,
-            texWidth,
-            texHeight);
-
-        renderTexturedQuad(tessellator, x + 2, y + height, width - 3, 1, 18, 45, 43, 46, texWidth, texHeight);
-
-        renderTexturedQuad(tessellator, x + (width / 2) - 6.5, y, 2, 1, 26, 17, 28, 18, texWidth, texHeight);
-        renderTexturedQuad(tessellator, x + (width / 2) + 6.5, y, 2, 1, 34, 17, 36, 18, texWidth, texHeight);
-        renderTexturedQuad(tessellator, x + (width / 2) - 6.5, y - 11, 15, 13, 1, 1, 16, 14, texWidth, texHeight);
-
-        GL11.glDisable(GL11.GL_BLEND);
+        int size = 16;
+        int ix = x + (width - size) / 2 + 2;
+        int iy = y - size + 3;
+        renderQuad(tessellator, ix, iy, size, size, 0, 0, size, size, 16, 16);
     }
 
-    private void renderTexturedQuad(Tessellator tessellator, double x, double y, double width, double height,
-        double uStart, double vStart, double uEnd, double vEnd, double texWidth, double texHeight) {
+    private static void renderQuad(Tessellator tessellator, double x, double y, double width, double height,
+                                   double uStart, double vStart, double uEnd, double vEnd, double texWidth, double texHeight) {
+        double uMin = uStart / texWidth;
+        double vMin = vStart / texHeight;
+        double uMax = uEnd / texWidth;
+        double vMax = vEnd / texHeight;
+
+        tessellator.startDrawingQuads();
+        tessellator.addVertexWithUV(x, y + height, 0, uMin, vMax);
+        tessellator.addVertexWithUV(x + width, y + height, 0, uMax, vMax);
+        tessellator.addVertexWithUV(x + width, y, 0, uMax, vMin);
+        tessellator.addVertexWithUV(x, y, 0, uMin, vMin);
+        tessellator.draw();
+    }
+
+    private static void renderQuadTexture(Tessellator tessellator, double x, double y, double width, double height,
+                                   double uStart, double vStart, double uEnd, double vEnd, double texWidth, double texHeight) {
         double uMin = uStart / texWidth;
         double vMin = vStart / texHeight;
         double uMax = uEnd / texWidth;
@@ -104,23 +171,5 @@ public class TooltipRenderHelper {
         tessellator.draw();
     }
 
-    public void drawTexturedSeparator(int x, int y, int width, ResourceLocation resourceLocation) {
-        if (TooltipConfig.BACKGROUND_TEXTURE == null) return;
 
-        Minecraft mc = Minecraft.getMinecraft();
-        mc.getTextureManager()
-            .bindTexture(resourceLocation);
-
-        float texWidth = 64.0f;
-        float texHeight = 64.0f;
-
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-
-        Tessellator tessellator = Tessellator.instance;
-        renderTexturedQuad(tessellator, x, y, width, 1, 18, 7, 44, 8, texWidth, texHeight);
-
-        GL11.glDisable(GL11.GL_BLEND);
-    }
 }
