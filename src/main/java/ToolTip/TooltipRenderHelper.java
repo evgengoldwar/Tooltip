@@ -65,45 +65,50 @@ public class TooltipRenderHelper {
 
 
         // Top Left Angle
-        renderQuadTexture(tessellator, x - 1, y - 1, 3, 3, 17, 17, 20, 20, texWidth, texHeight);
+        renderQuadTexture(tessellator, x - 1, y - 1, 5, 5, 17, 17, 22, 22, texWidth, texHeight);
         // Top Right Angle
-        renderQuadTexture(tessellator, x + width - 2, y - 1, 3, 3, 44, 17, 47, 20, texWidth, texHeight);
+        renderQuadTexture(tessellator, x + width - (5 - 1), y - 1, 5, 5, 42, 17, 47, 22, texWidth, texHeight);
         // Bottom Left Angle
-        renderQuadTexture(tessellator, x - 1, y + height - 2, 3, 3, 17, 44, 20, 47, texWidth, texHeight);
+        renderQuadTexture(tessellator, x - 1, y + height - (5 - 1), 5, 5, 17, 42, 22, 47, texWidth, texHeight);
         // Bottom Right Angle
-        renderQuadTexture(tessellator, x + width - 2, y + height - 2, 3, 3, 44, 44, 47, 47, texWidth, texHeight);
+        renderQuadTexture(tessellator, x + width - (5 - 1), y + height - (5 - 1), 5, 5, 42, 42, 47, 47, texWidth, texHeight);
 
 
         // Left Border
-        renderQuadTexture(tessellator, x - 1, y + 2, 1, height - 3d, 17, 20, 18, 44, texWidth, texHeight);
+        renderQuadTexture(tessellator, x - 1, y - 1 + 5, 1, height - 2 * (5 - 1), 17, 22, 18, 42, texWidth, texHeight);
         // Right Border
-        renderQuadTexture(tessellator, x + width, y + 2, 1, height - 3d, 46, 20, 47, 44, texWidth, texHeight);
+        renderQuadTexture(tessellator, x + width, y - 1 + 5, 1, height - 2 * (5 - 1), 46, 22, 47, 42, texWidth, texHeight);
 
 
         // Top Left Line
-        renderQuadTexture(tessellator, x + 2, y - 1, ((double) width / 2) - 8.5d, 1, 20, 17, 27, 18, texWidth, texHeight);
+        renderQuadTexture(tessellator, x + (5 - 1), y - 1, (x - 1 + (width / 2) - (3 * 32) / 8) - (x + (5 - 1) + 1), 1, 22, 17, 27, 18, texWidth, texHeight);
         // Top Right Line
         renderQuadTexture(
             tessellator,
-            x + ((double) width / 2) + 8.5d,
+            x + (5 - 1) + (width / 2) + (3 * 32) / 8,
             y - 1,
-            ((double) width / 2) - 10.5d,
+            (x - 1 + (width / 2) - (3 * 32) / 8) - (x + (5 - 1) + 1),
             1,
             37,
             17,
-            44,
+            42,
             18,
             texWidth,
             texHeight);
 
-        // Bottom Line
-        renderQuadTexture(tessellator, x + 2, y + height, width - 3d, 1, 19, 46, 44, 47, texWidth, texHeight);
-
-
         // Top Middle Left Angle
-        renderQuadTexture(tessellator, x + ((double) width / 2) - 6.5d, y, 2, 1, 27, 18, 29, 19, texWidth, texHeight);
+        renderQuadTexture(tessellator, x - 2 + (width / 2) - (3 * 32) / 8, y, 2, 1, 27, 18, 29, 19, texWidth, texHeight);
         // Top Middle Right Angle
-        renderQuadTexture(tessellator, x + ((double) width / 2) + 6.5d, y, 2, 1, 35, 18, 37, 19, texWidth, texHeight);
+        renderQuadTexture(tessellator, x + 2 + (width / 2) + (3 * 32) / 8, y, 2, 1, 35, 18, 37, 19, texWidth, texHeight);
+
+
+        // Bottom Left Line
+        renderQuadTexture(tessellator, x + (5 - 1), y + height, ((width - (5 - 1) - 14) / 2) - 2, 1, 22, 46, 25, 47, texWidth, texHeight);
+        // Bottom Right Line
+        renderQuadTexture(tessellator, x + (double) (width + 14) / 2 - 1, y + height, ((width - (5 - 1) - (double) 14) / 2), 1, 39, 46, 42, 47, texWidth, texHeight);
+        // Bottom ornament
+        renderQuadTexture(tessellator, x + (double) (width - 14) / 2 - 1, y + height - 2, 14, 6, 25, 44, 39, 50, texWidth, texHeight);
+
 
 //        GL11.glDisable(GL11.GL_BLEND);
     }
@@ -151,7 +156,7 @@ public class TooltipRenderHelper {
         int paddingHeight = 1;
         int ix = x + (width - textureWidth) / 2 + paddingWidth;
         int iy = y - textureHeight + paddingHeight;
-        renderQuad(tessellator, ix, iy, textureWidth, textureHeight, 0, 0, 31, 15, textureWidth, textureHeight);
+        renderQuad(tessellator, ix, iy, textureWidth, textureHeight, 0, 0, 32, 16, textureWidth, textureHeight);
     }
 
     private static void renderQuad(Tessellator tessellator, double x, double y, double width, double height,
