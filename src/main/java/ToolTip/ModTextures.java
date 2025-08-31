@@ -2,9 +2,8 @@ package ToolTip;
 
 import net.minecraft.util.ResourceLocation;
 
-import javax.annotation.Nullable;
-
 public enum ModTextures {
+
     // 1) ModName 2) Path border 3) Path separator 4) Path icon
     TEST("test", getPath("test/border"), getPath("test/separator"), getPath("test/icon")),
 

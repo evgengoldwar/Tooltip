@@ -28,11 +28,15 @@ public class TooltipConfig {
     public static int ITEM_SIZE = 32;
     public static boolean USE_ITEM_RENDER = true;
 
-
     // Default texture
-    public static ResourceLocation BORDER_TEXTURE = new ResourceLocation("tooltipimprove", "textures/gui/default/border.png");
-    public static ResourceLocation SEPARATOR_TEXTURE = new ResourceLocation("tooltipimprove", "textures/gui/default/separator.png");
-    public static ResourceLocation TOP_ICON_TEXTURE = new ResourceLocation("tooltipimprove", "textures/gui/default/icon.png");
-
+    public static ResourceLocation BORDER_TEXTURE = new ResourceLocation(
+        "tooltipimprove",
+        "textures/gui/default/border.png");
+    public static ResourceLocation SEPARATOR_TEXTURE = new ResourceLocation(
+        "tooltipimprove",
+        "textures/gui/default/separator.png");
+    public static ResourceLocation TOP_ICON_TEXTURE = new ResourceLocation(
+        "tooltipimprove",
+        "textures/gui/default/icon.png");
 
 }

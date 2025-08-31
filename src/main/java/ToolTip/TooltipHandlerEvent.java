@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
 
 import com.gtnewhorizon.gtnhlib.client.event.RenderTooltipEvent;
 
