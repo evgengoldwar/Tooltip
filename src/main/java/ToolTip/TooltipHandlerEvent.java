@@ -29,7 +29,7 @@ public class TooltipHandlerEvent {
         event.alternativeRenderer = tooltip -> {
             if (tooltip.isEmpty()) return;
 
-            tooltip.add("test");
+            tooltip.add("bloodmagic");
 
             // Variables
             String displayName = event.itemStack.getDisplayName();

@@ -8,7 +8,8 @@ public enum ModTextures {
     TEST("test", getPath("test/border"), getPath("test/separator"), getPath("test/icon")),
 
     GT_MAX_TIER("2,147,483,640", "", "", ""),
-    GT_UXV_TIER("32_127", "", "", "");
+    GT_UXV_TIER("32_127", "", "", ""),
+    BLOODMAGIC("bloodmagic", getPath("bloodmagic/border"), getPath("bloodmagic/separator"), getPath("bloodmagic/icon"));
 
     private final String modName;
     private final ResourceLocation borderTexture;
