@@ -11,6 +11,7 @@ import net.minecraft.item.ItemStack;
 
 import com.gtnewhorizon.gtnhlib.client.event.RenderTooltipEvent;
 
+import codechicken.lib.gui.GuiDraw;
 import codechicken.nei.NEIClientConfig;
 import codechicken.nei.api.ItemInfo;
 import cpw.mods.fml.common.Loader;
@@ -29,7 +30,7 @@ public class TooltipHandlerEvent {
         event.alternativeRenderer = tooltip -> {
             if (tooltip.isEmpty()) return;
 
-            tooltip.add("test");
+//            tooltip.add("test");
 
             // Variables
             String displayName = event.itemStack.getDisplayName();
@@ -55,7 +56,9 @@ public class TooltipHandlerEvent {
 
             // Delete duplicate ModName
             filteredTooltip = filteredTooltip.stream()
-                .filter(str -> !str.contains(modName))
+                .filter(
+                    str -> !str.contains(modName) || str.startsWith(GuiDraw.TOOLTIP_HANDLER)
+                        || str.endsWith(GuiDraw.TOOLTIP_LINESPACE))
                 .collect(Collectors.toList());
 
             int width = tooltipPositionCalculator

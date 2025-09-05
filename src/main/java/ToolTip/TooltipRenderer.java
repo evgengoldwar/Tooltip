@@ -1,5 +1,7 @@
 package ToolTip;
 
+import static codechicken.lib.gui.GuiDraw.gui;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +16,8 @@ import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
+
+import codechicken.lib.gui.GuiDraw;
 
 public class TooltipRenderer {
 
@@ -163,14 +167,26 @@ public class TooltipRenderer {
     }
 
     public void renderTooltipContent(List<String> tooltip, FontRenderer font, int x, int y) {
+        gui.incZLevel(-400);
         int currentY = y;
         for (String line : tooltip) {
             if (line != null && !line.trim()
                 .isEmpty()) {
-                font.drawStringWithShadow(TooltipConfig.TOOLTIP_COLOR + line, x, currentY, 0xFFFFFF);
-                currentY += 10;
+                if (line.startsWith(GuiDraw.TOOLTIP_HANDLER)) {
+                    GuiDraw.ITooltipLineHandler handler = GuiDraw.getTipLine(line);
+                    if (handler != null) {
+                        handler.draw(x, currentY);
+                        currentY += handler.getSize().height;
+                    }
+                } else if (line.endsWith(GuiDraw.TOOLTIP_LINESPACE)) {
+                    currentY += 12;
+                } else {
+                    font.drawStringWithShadow(TooltipConfig.TOOLTIP_COLOR + line, x, currentY, 0xFFFFFF);
+                    currentY += 10;
+                }
             }
         }
+        gui.incZLevel(400);
     }
 
     public void renderItemStack(ItemStack stack, int x, int y) {

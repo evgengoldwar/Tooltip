@@ -6,6 +6,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.ScaledResolution;
 
+import codechicken.lib.gui.GuiDraw;
+
 public class TooltipPositionCalculator {
 
     public int[] calculateSafePosition(int mouseX, int mouseY, int width, int height) {
@@ -67,7 +69,14 @@ public class TooltipPositionCalculator {
             for (String line : tooltip) {
                 if (line != null && !line.trim()
                     .isEmpty()) {
-                    maxWidth = Math.max(maxWidth, font.getStringWidth(line));
+                    int lineWidth;
+                    if (line.startsWith(GuiDraw.TOOLTIP_HANDLER)) {
+                        GuiDraw.ITooltipLineHandler handler = GuiDraw.getTipLine(line);
+                        lineWidth = handler != null ? handler.getSize().width : 0;
+                    } else {
+                        lineWidth = font.getStringWidth(line);
+                    }
+                    maxWidth = Math.max(maxWidth, lineWidth);
                 }
             }
         }
@@ -96,7 +105,16 @@ public class TooltipPositionCalculator {
             for (String line : tooltip) {
                 if (line != null && !line.trim()
                     .isEmpty()) {
-                    height += 10;
+                    if (line.startsWith(GuiDraw.TOOLTIP_HANDLER)) {
+                        GuiDraw.ITooltipLineHandler handler = GuiDraw.getTipLine(line);
+                        if (handler != null) {
+                            height += handler.getSize().height;
+                        }
+                    } else if (line.endsWith(GuiDraw.TOOLTIP_LINESPACE)) {
+                        height += 12;
+                    } else {
+                        height += 10;
+                    }
                 }
             }
         }

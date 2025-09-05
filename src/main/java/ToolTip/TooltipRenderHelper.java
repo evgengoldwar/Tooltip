@@ -106,7 +106,7 @@ public class TooltipRenderHelper {
             tessellator,
             x + (5 - 1) + (width / 2) + (3 * 32) / 8,
             y - 1,
-            (x - 1 + (width / 2) - (3 * 32) / 8) - (x + (5 - 1) + 1),
+            (x - 1 + (width / 2) - (3 * 32) / 8) - (x + (5 - 1) + 1) - 1,
             1,
             37,
             17,
